@@ -4,6 +4,7 @@
 
 clear
 clc
+close all
 
 addpath('./functions/');
 addpath('./Data/');
@@ -29,21 +30,22 @@ ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
 r0_nom_N = [0,-1,0]';
 r0_nom = norm(r0_nom_N);
 v0_nom_N = [0,0,sqrt(mu/r0_nom)]';
-x0_nom_N = [r0_nom_N; v0_nom_N];
+X0_nom_N = [r0_nom_N; v0_nom_N];
 
-ode_fun = @(t,x) dynamics(t,x,params);
-[t,X_sim] = ode45(ode_fun,time_span,x0_nom_N,ode_options);
+ode_fun = @(t,X) dynamics(t,X,params);
+[t,X_sim] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
 
-% plot inertial position, earth, and max altitude location
+% plot inertial orbit
 figure
-plot3(X_sim(:,1), X_sim(:,2), X_sim(:,3))
+plot3(X_sim(:,1), X_sim(:,2), X_sim(:,3), 'LineWidth', 1.5)
 hold on
-% surf(surfX, surfY, surfZ)
+scatter3(0,0,0, 'filled')
 axis equal
-title("Satellite Orbit around Asteroid (Inertial Frame)")
+title("True Trajectory in Inertial Frame")
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
+grid on
 hold off
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
