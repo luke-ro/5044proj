@@ -1,4 +1,4 @@
-function [dx] = dynamics(t,X,constants)
+function [dX] = dynamics(t,X,constants)
 % This is the function ode45 uses to integrate the nonlinear dynamics
 
 % Constants
@@ -13,9 +13,9 @@ AreaMass = 1/62*10^-6; % Area-to-mass ratio
 % Extract states
 r_N = X(1:3); % inertial position
 r = norm(r_N); % radial distance
-v_N = X(1:3); % inertial velocity
+v_N = X(4:6); % inertial velocity
 
-a2B = -mu/r^3*r_V; % two body acceleration
+a2B = -mu/r^3*r_N; % two body acceleration
 aSRP = -phi0/rSA^2*(1+4/9*rho)*AreaMass * rSA_N; % solar radiation pressure
 a_N = a2B + aSRP; % total acceleration
 
