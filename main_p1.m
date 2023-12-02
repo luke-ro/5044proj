@@ -23,7 +23,7 @@ AreaMass = 1/62*10^-6; % Area-to-mass ratio
 % Simulate data with nonlinear dynamics and no noise
 
 Dt = 600; % [s]
-time_span = [0,100000]; % [s]
+time_span = 0:Dt:259200; % [s]
 params = [0,0]; %if we need extra constants for our func
 ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
 
@@ -36,17 +36,12 @@ ode_fun = @(t,X) dynamics(t,X,params);
 [t,X_sim] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
 
 % plot inertial orbit
-figure
-plot3(X_sim(:,1), X_sim(:,2), X_sim(:,3), 'LineWidth', 1.5)
-hold on
-scatter3(0,0,0, 'filled')
-axis equal
-title("True Trajectory in Inertial Frame")
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
-grid on
-hold off
+title = "True Trajectory in Inertial Frame";
+plotOrbit(X_sim(:,1:3), title)
+
+title = "States vs. Time";
+plotStates(t,X_sim,title)
+
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
 
