@@ -21,7 +21,8 @@ phi0 = 1*10^14; % [kg*km/s^2]
 rho = 0.4; % coefficient of reflectivity
 AreaMass = 1/62*10^-6; % Area-to-mass ratio
 f = 2089.8959; % [pixels]
-uv0 = 512; % [pixels]
+u0 = 512; % [pixels]
+v0 = 512; % [pixels]
 uv_min = 0; % [pixels]
 uv_max = 1024; % [pixels]
 
@@ -67,11 +68,12 @@ for i = 1:length(t)
     X_sim_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
+
     for j = 1:length(pos_lmks_A)
         pos_lmks_C(:,j,i) = CN(:,:,i)*NA(:,:,i)*pos_lmks_A(:,j);
         lmk_in_front(i,j) = pos_lmks_C(3,j,i) < 0;
-        u = f*dot((pos_lmks_A(:,j) - r_A),NC(:,1,i))/dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) + uv0;
-        v = f*dot((pos_lmks_A(:,j) - r_A),NC(:,1,i))/dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) + uv0;
+
+        [u,v] = uv_func(r_A, pos_lmks_A(:,j), NC(:,:,i),u0,v0);
         lmk_in_FOV = (0<=u & u<=uv_max) & (0<=v & v<=uv_max) & (dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) > 0);
         if pos_lmks_C(3,j,i) < 0
             uv(:,j,i) = [u;v];
