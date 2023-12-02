@@ -68,6 +68,8 @@ for i = 1:length(t)
     X_sim_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
+    
+    getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
 
     for j = 1:length(pos_lmks_A)
         pos_lmks_C(:,j,i) = CN(:,:,i)*NA(:,:,i)*pos_lmks_A(:,j);
@@ -79,6 +81,7 @@ for i = 1:length(t)
             uv(:,j,i) = [u;v];
         end
     end
+    temp = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
 end
 r_A = X_sim_A(1:3,:);
 
