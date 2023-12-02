@@ -12,7 +12,6 @@ xlabel('X [km]')
 ylabel('Y [km]')
 zlabel('Z [km]')
 grid on
-hold off
 
 end
 
