@@ -21,6 +21,5 @@ aSRP = -phi0/rSA^3*(1+4/9*rho)*AreaMass * rSA_N; % solar radiation pressure
 a_N = a2B + aSRP; % total acceleration
 
 dX = [v_N; a_N];
-test = 0;
 end
 
