@@ -1,7 +1,7 @@
 function [J] = dyn_jacobian(x)
-x1 = X(1);
-x2 = X(2);
-x3 = X(3);
+x1 = x(1);
+x2 = x(2);
+x3 = x(3);
 % x4 = X(4);
 % x5 = X(5);
 % x6 = X(6);
