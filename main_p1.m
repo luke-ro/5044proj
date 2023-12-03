@@ -68,20 +68,28 @@ for i = 1:length(t)
     X_sim_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
+
+    % the next three lines should replace the commented for loop below
     
-    getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
+    % get a logical vec of true where landmarks are in "front" of benu
+    lmk_in_front_new = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
 
-    for j = 1:length(pos_lmks_A)
-        pos_lmks_C(:,j,i) = CN(:,:,i)*NA(:,:,i)*pos_lmks_A(:,j);
-        lmk_in_front(i,j) = pos_lmks_C(3,j,i) < 0;
+    %get the pixel coords of all landmarks
+    [us,vs] = uv_func(r_A, pos_lmks_A, NC(:,:,i),u0,v0);
+    
+    % get a logical vec of true where LMs are within FOV
+    lmks_in_FOV_new = getLMsInFOV(pos_lmks_A,r_A,NC(:,3,i),us,vs,uv_max,uv_max);
 
-        [u,v] = uv_func(r_A, pos_lmks_A(:,j), NC(:,:,i),u0,v0);
-        lmk_in_FOV = (0<=u & u<=uv_max) & (0<=v & v<=uv_max) & (dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) > 0);
-        if pos_lmks_C(3,j,i) < 0
-            uv(:,j,i) = [u;v];
-        end
-    end
-    temp = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
+%     for j = 1:length(pos_lmks_A)
+%         pos_lmks_C(:,j,i) = CN(:,:,i)*NA(:,:,i)*pos_lmks_A(:,j);
+%         lmk_in_front(i,j) = pos_lmks_C(3,j,i) < 0;
+% 
+%         [u,v] = uv_func(r_A, pos_lmks_A(:,j), NC(:,:,i),u0,v0);
+%         lmk_in_FOV = (0<=u & u<=uv_max) & (0<=v & v<=uv_max) & (dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) > 0);
+%         if pos_lmks_C(3,j,i) < 0
+%             uv(:,j,i) = [u;v];
+%         end
+%     end
 end
 r_A = X_sim_A(1:3,:);
 
