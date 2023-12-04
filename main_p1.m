@@ -3,7 +3,6 @@
 % Mikaela Felix, Amanda Marlow, Luke Roberson
 
 clear
-clc
 close all
 
 addpath('./functions/');
@@ -25,6 +24,8 @@ u0 = 512; % [pixels]
 v0 = 512; % [pixels]
 uv_min = 0; % [pixels]
 uv_max = 1024; % [pixels]
+
+num_LMKs = 50;
 
 %% Problem 1:
 % Simulate data with nonlinear dynamics and no noise
@@ -58,6 +59,13 @@ X_sim_A = zeros(6,433);
 AN = zeros(3,3,433);
 pos_lmks_C = zeros(3,50,433);
 uv = zeros(2,50,433);
+
+
+lmks_in_FOV = zeros(num_LMKs,length(t));
+lmks_in_front = zeros(num_LMKs,length(t));
+
+us = zeros(num_LMKs,length(t));
+vs = zeros(num_LMKs,length(t));
 for i = 1:length(t)
     theta = omegaA*t(i);
     NA(:,:,i) = [cos(theta), -sin(theta), 0; sin(theta), cos(theta), 0; 0 0 1];
@@ -68,29 +76,22 @@ for i = 1:length(t)
     X_sim_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
-
-    % the next three lines should replace the commented for loop below
+    AC(:,:,i) = AN(:,:,i)*NC(:,:,i);
     
     % get a logical vec of true where landmarks are in "front" of benu
-    lmk_in_front_new = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
+    lmks_in_front(:,i) = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
 
-    %get the pixel coords of all landmarks
-    [us,vs] = uv_func(r_A, pos_lmks_A, NC(:,:,i),u0,v0);
+    % get the pixel coords of all landmarks
+    [us(:,i),vs(:,i)] = uv_func(r_A, pos_lmks_A, AC(:,:,i),u0,v0);
     
     % get a logical vec of true where LMs are within FOV
-    lmks_in_FOV_new = getLMsInFOV(pos_lmks_A,r_A,NC(:,3,i),us,vs,uv_max,uv_max);
-
-%     for j = 1:length(pos_lmks_A)
-%         pos_lmks_C(:,j,i) = CN(:,:,i)*NA(:,:,i)*pos_lmks_A(:,j);
-%         lmk_in_front(i,j) = pos_lmks_C(3,j,i) < 0;
-% 
-%         [u,v] = uv_func(r_A, pos_lmks_A(:,j), NC(:,:,i),u0,v0);
-%         lmk_in_FOV = (0<=u & u<=uv_max) & (0<=v & v<=uv_max) & (dot((pos_lmks_A(:,j) - r_A),NC(:,3,i)) > 0);
-%         if pos_lmks_C(3,j,i) < 0
-%             uv(:,j,i) = [u;v];
-%         end
-%     end
+    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A,r_A,NC(:,3,i),us(:,i)',vs(:,i)',uv_max,uv_max);
 end
+
+% get logical vec vector true where lmks are visible to satellite
+lmks_visible = lmks_in_FOV & lmks_in_front;
+
+% get position from simulated points
 r_A = X_sim_A(1:3,:);
 
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
