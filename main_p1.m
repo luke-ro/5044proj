@@ -104,6 +104,138 @@ scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 %% Problem 3 linearize
 % linearize our dynamics about a given point
 
+% B and D matrices
+B = zeros(6,1);
+D = zeros(2,2);
+
+% initialize A and C matrices
+bigA = zeros(6,6,length(time_span));
+bigF = zeros(6,6,length(time_span));
+bigG = zeros(6,1,length(time_span));
+
+% C = zeros(2, 6, time_span);
+z_1by7 = zeros(1,7);
+X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
+X_delta = [X0_delta zeros(6,length(time_span)-1)];
+X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)]
+X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
+
+for i = 1:length(time_span)
+    A = dyn_jacobian(X_sim_N(:,i));
+    Ahat = [A B; z_1by7];
+    phim_hat = expm(Ahat*Dt);
+    F = phim_hat(1:6, 1:6);
+    G = phim_hat(1:6, 7);
+
+    X_DT_nom(:,i+1) = F * X_DT_nom(:,i);
+
+    X_DT_total(:,i+1) = F * (X_sim_N(:,i)+X_delta(:,i));
+    X_delta(:,i+1) = X_DT_total(:,i+1) - X_DT_nom(:,i);
+
+    bigA(:,:,i) = A;
+    bigF(:,:,i) = F;
+    bigG(:,:,i) = G;
+
+    for j = 1:length(pos_lmks_A)
+        C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
+    end
+end
+X_DT_nom = X_DT_nom(:,1:end-1);
+X_DT_total = X_DT_total(:,1:end-1);
+
+% X_DT_nom = [X0_nom_N+X0_delta zeros(6,length(time_span) - 1)];
+% for i = 1:length(time_span)
+%     A = dyn_jacobian(X_DT_nom(:,i));
+%     Ahat = [A B; z_1by7];
+%     phim_hat = expm(Ahat*Dt);
+%     F = phim_hat(1:6, 1:6);
+%     G = phim_hat(1:6, 7);
+%     X_delta(:,i+1) = F * X_delta(:,i);
+%     X_DT_nom(:,i+1) = F * X_DT_nom(:,i);
+%     
+% 
+%     bigA(:,:,i) = A;
+%     bigF(:,:,i) = F;
+%     bigG(:,:,i) = G;
+% 
+%     for j = 1:length(pos_lmks_A)
+%         C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
+%     end
+% end
+% X_DT_nom = X_DT_nom(:,2:end);
+X_delta = X_delta(:,2:end);
+
+% figure
+% hold on
+% sgtitle("Nominal State over Time")
+% 
+% subplot(6,1,1); plot(t,X_DT_nom(1,:))
+% 
+% subplot(6,1,2); plot(t,X_DT_nom(2,:))
+% 
+% subplot(6,1,3); plot(t,X_DT_nom(3,:))
+% 
+% subplot(6,1,4); plot(t,X_DT_nom(4,:))
+% 
+% subplot(6,1,5); plot(t,X_DT_nom(5,:))
+% 
+% subplot(6,1,6); plot(t,X_DT_nom(6,:))
+% 
+% hold off
+
+% plotStates(t,X_DT_nom,"Nominal State over Time")
+
+
+
 
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
+
+figure
+hold on
+sgtitle("Nominal State over Time")
+
+subplot(6,1,1)
+hold on
+plot(t,X_DT_nom(1,:))
+% plot(t,X_sim_N(1,:))
+ylabel("x")
+hold off
+
+subplot(6,1,2); 
+hold on
+plot(t,X_DT_nom(2,:))
+plot(t,X_sim_N(2,:))
+ylabel("y")
+hold off
+
+subplot(6,1,3); 
+hold on
+plot(t,X_DT_nom(3,:))
+plot(t,X_sim_N(3,:))
+ylabel("z")
+hold off
+
+subplot(6,1,4); 
+hold on
+plot(t,X_DT_nom(4,:))
+plot(t,X_sim_N(4,:))
+ylabel("xdot")
+hold off
+
+subplot(6,1,5);
+hold on
+plot(t,X_DT_nom(5,:))
+plot(t,X_sim_N(5,:))
+ylabel("ydot")
+hold off
+
+subplot(6,1,6); 
+hold on
+plot(t,X_DT_nom(6,:))
+plot(t,X_sim_N(6,:))
+ylabel("zdot")
+hold off
+
+hold off
+
