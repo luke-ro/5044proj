@@ -1,7 +1,9 @@
-function [J] = dyn_jacobian_H(r, l, R)
-    r1 = r(1);
-    r2 = r(2);
-    r3 = r(3);
+function [J] = dyn_jacobian_H(x, l, R)
+    r1 = x(1);
+    r2 = x(2);
+    r3 = x(3);
+
+    r = x(1:3);
 
     l1 = l(1);
     l2 = l(2);
