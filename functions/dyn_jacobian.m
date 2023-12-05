@@ -1,4 +1,4 @@
-function [J] = dyn_jacobian(x)
+function [J] = dyn_jacobian(x,const)
 x1 = x(1);
 x2 = x(2);
 x3 = x(3);
@@ -6,7 +6,7 @@ x3 = x(3);
 % x5 = X(5);
 % x6 = X(6);
 
-Mua = 4.892e-9;
+Mua = const.mu;
 denom = (x1^2+x2^2+x3^2)^(5/2);
 denom1 = (x1^2+x2^2+x3^2)^(3/2);
 J = zeros(6,6);
