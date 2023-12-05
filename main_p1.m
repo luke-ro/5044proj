@@ -104,7 +104,7 @@ scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 % linearize our dynamics about a given point
 
 % B and D matrices
-B = zeros(6,1);
+B = [0; 0; 0; -phi0/rSA^3*(1+4/9*rho)*AreaMass * rSA_N];
 D = zeros(2,2);
 
 % initialize A and C matrices
@@ -116,7 +116,7 @@ bigG = zeros(6,1,length(time_span));
 z_1by7 = zeros(1,7);
 X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 X_delta = [X0_delta zeros(6,length(time_span)-1)];
-X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)]
+X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)];
 X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
 
 for i = 1:length(time_span)
@@ -125,10 +125,11 @@ for i = 1:length(time_span)
     phim_hat = expm(Ahat*Dt);
     F = phim_hat(1:6, 1:6);
     G = phim_hat(1:6, 7);
+    
+    X_DT_nom(:,i+1) = F * X_DT_nom(:,i) + G;
+    X_DT_total(:,i+1) = F * X_DT_total(:,i);
 
-    X_DT_nom(:,i+1) = F * X_DT_nom(:,i);
-
-    X_DT_total(:,i+1) = F * (X_sim_N(:,i)+X_delta(:,i));
+%     X_DT_total(:,i+1) = F * (X_sim_N(:,i)+X_delta(:,i));
     X_delta(:,i+1) = X_DT_total(:,i+1) - X_DT_nom(:,i);
 
     bigA(:,:,i) = A;
@@ -197,7 +198,7 @@ sgtitle("Nominal State over Time")
 subplot(6,1,1)
 hold on
 plot(t,X_DT_nom(1,:))
-% plot(t,X_sim_N(1,:))
+plot(t,X_sim_N(1,:))
 ylabel("x")
 hold off
 
