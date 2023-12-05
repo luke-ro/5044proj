@@ -1,5 +1,5 @@
 function [u,v] = uv_func(r,lm,R,u0,v0)
-    f = 2080.7959; % [pixels]
+    f = 2089.7959; % [pixels]
     n = size(lm,2);
     if(n==1)
         u = f*dot((lm - r), R(:,1))/dot((lm - r), R(:,3)) + u0;

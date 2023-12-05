@@ -85,7 +85,7 @@ for i = 1:length(t)
     [us(:,i),vs(:,i)] = uv_func(r_A, pos_lmks_A, AC(:,:,i),u0,v0);
     
     % get a logical vec of true where LMs are within FOV
-    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A,r_A,NC(:,3,i),us(:,i)',vs(:,i)',uv_max,uv_max);
+    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A, r_A, AC(:,3,i),us(:,i)',vs(:,i)',uv_max,uv_max);
 end
 
 % get logical vec vector true where lmks are visible to satellite
