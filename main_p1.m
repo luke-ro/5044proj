@@ -19,7 +19,7 @@ rSA = norm(rSA_N); % Distance from Sun to Asteroid
 phi0 = 1*10^14; % [kg*km/s^2]
 rho = 0.4; % coefficient of reflectivity
 AreaMass = 1/62*10^-6; % Area-to-mass ratio
-f = 2089.8959; % [pixels]
+f = 2089.7959; % [pixels]
 u0 = 512; % [pixels]
 v0 = 512; % [pixels]
 uv_min = 0; % [pixels]
@@ -99,157 +99,60 @@ scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
-syms x1 x2 x3 x4 x5 x6
-r3 = (sqrt(x1^2+x2^2+x3^2))^3;
-X = [x1,x2,x3,x4,x5,x6];
-Ftil = [x4,x5,x6,-mu/r3*x1,-mu/r3*x2,-mu/r3*x3];
-temp = matlabFunction(jacobian(Ftil,X));
-jac_sym = @(st)temp(st(1),st(2),st(3));
 
 %% Problem 3 linearize
 % linearize our dynamics about a given point
 
 % B and D matrices
 B = zeros(6,1);
-% B(4:6) = phi0/rSA^3*(1+4/9*rho)*AreaMass * rSA_N;
+% B(4:6) = -phi0/rSA^3*(1+4/9*rho)*AreaMass * rSA_N; % <- solution doesn't include this
 D = zeros(2,2);
 
 % initialize A and C matrices
 bigA = zeros(6,6,length(time_span));
 bigF = zeros(6,6,length(time_span));
 bigG = zeros(6,1,length(time_span));
+bigC = cell(1,length(time_span));
 
 % C = zeros(2, 6, time_span);
 z_1by7 = zeros(1,7);
 X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 
-% X0_delta = [0 0 0 0  0 0]';
+% X0_delta = [0 0 0 1e7  0 0]';
 X_delta = [X0_delta zeros(6,length(time_span)-1)];
 X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)];
 X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
 
 
-for i = 1:length(time_span)
+for i = 1:length(time_span)-1
+    %calcuate jacobian accoring to nominal traj
     A = dyn_jacobian(X_sim_N(:,i));
-%     A = jac_sym(X_sim_N(:,i));
+    
+    %calcuate f using matrix expm
     Ahat = [A B; z_1by7];
     phim_hat = expm(Ahat*Dt);
     F = phim_hat(1:6, 1:6);
     G = phim_hat(1:6, 7);
     
-%     F = eye(6) + A*Dt;
+%     F = eye(6) +A*Dt;
 
-    X_delta(:,i+1) = F * X_delta(:,i) + B*Dt;
-
-%     X_DT_total(:,i+1) = F * (X_sim_N(:,i)+X_delta(:,i));
-%     X_delta(:,i+1) = X_DT_total(:,i+1) - X_DT_nom(:,i);
-
-    bigA(:,:,i) = A;
-    bigF(:,:,i) = F;
-    bigG(:,:,i) = G;
-
+    %propogate delta state
+    X_delta(:,i+1) = F * X_delta(:,i) + G;
+    
+    % cacluate C
     for j = 1:length(pos_lmks_A)
         C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
     end
+    
+    bigA(:,:,i) = A;
+    bigF(:,:,i) = F;
+    bigG(:,:,i) = G;
+    bigC(i) = {C};
 end
-X_DT_nom = X_DT_nom(:,1:end-1);
-X_DT_total = X_DT_total(:,1:end-1);
 
-plotStates(t,X_delta(:,2:end),"Linearzied States")
-
-% X_DT_nom = [X0_nom_N+X0_delta zeros(6,length(time_span) - 1)];
-% for i = 1:length(time_span)
-%     A = dyn_jacobian(X_DT_nom(:,i));
-%     Ahat = [A B; z_1by7];
-%     phim_hat = expm(Ahat*Dt);
-%     F = phim_hat(1:6, 1:6);
-%     G = phim_hat(1:6, 7);
-%     X_delta(:,i+1) = F * X_delta(:,i);
-%     X_DT_nom(:,i+1) = F * X_DT_nom(:,i);
-%     
-% 
-%     bigA(:,:,i) = A;
-%     bigF(:,:,i) = F;
-%     bigG(:,:,i) = G;
-% 
-%     for j = 1:length(pos_lmks_A)
-%         C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
-%     end
-% end
-% X_DT_nom = X_DT_nom(:,2:end);
-X_delta = X_delta(:,2:end);
-
-% figure
-% hold on
-% sgtitle("Nominal State over Time")
-% 
-% subplot(6,1,1); plot(t,X_DT_nom(1,:))
-% 
-% subplot(6,1,2); plot(t,X_DT_nom(2,:))
-% 
-% subplot(6,1,3); plot(t,X_DT_nom(3,:))
-% 
-% subplot(6,1,4); plot(t,X_DT_nom(4,:))
-% 
-% subplot(6,1,5); plot(t,X_DT_nom(5,:))
-% 
-% subplot(6,1,6); plot(t,X_DT_nom(6,:))
-% 
-% hold off
-
-% plotStates(t,X_DT_nom,"Nominal State over Time")
-
-
-
+plotStates(t,X_delta,"\delta Linearzied States")
 
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
-% 
-% figure
-% hold on
-% sgtitle("Nominal State over Time")
-% 
-% subplot(6,1,1)
-% hold on
-% plot(t,X_DT_nom(1,:))
-% % plot(t,X_sim_N(1,:))
-% ylabel("x")
-% hold off
-% 
-% subplot(6,1,2); 
-% hold on
-% plot(t,X_DT_nom(2,:))
-% plot(t,X_sim_N(2,:))
-% ylabel("y")
-% hold off
-% 
-% subplot(6,1,3); 
-% hold on
-% plot(t,X_DT_nom(3,:))
-% plot(t,X_sim_N(3,:))
-% ylabel("z")
-% hold off
-% 
-% subplot(6,1,4); 
-% hold on
-% plot(t,X_DT_nom(4,:))
-% plot(t,X_sim_N(4,:))
-% ylabel("xdot")
-% hold off
-% 
-% subplot(6,1,5);
-% hold on
-% plot(t,X_DT_nom(5,:))
-% plot(t,X_sim_N(5,:))
-% ylabel("ydot")
-% hold off
-% 
-% subplot(6,1,6); 
-% hold on
-% plot(t,X_DT_nom(6,:))
-% plot(t,X_sim_N(6,:))
-% ylabel("zdot")
-% hold off
-% 
-% hold off
+
 
