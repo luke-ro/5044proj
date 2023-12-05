@@ -1,4 +1,4 @@
-function [] = plotStates(t,X,title)
+function [] = plotStates(t,X,title,modifier)
 %PLOTSTATES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,38 +9,38 @@ subplot(6,1,1)
 sgtitle(title, 'Interpreter', 'latex')
 plot(t, X(1,:));
 hold on
-ylabel('$r_{\hat{X}}$ [m]', 'Interpreter', 'latex')
+ylabel([modifier,'$r_{\hat{X}}$ [km]'], 'Interpreter', 'latex')
 % hold off
 
 subplot(6,1,2)
 plot(t, X(2,:));
 hold on
-ylabel('$r_{\hat{Y}}$ [m]', 'Interpreter', 'latex')
+ylabel([modifier,'$r_{\hat{Y}}$ [km]'], 'Interpreter', 'latex')
 % hold off
 
 subplot(6,1,3)
 plot(t, X(3,:));
 hold on
-ylabel('$r_{\hat{Z}}$ [m]', 'Interpreter', 'latex')
-xlabel('time [s]')
+ylabel([modifier,'$r_{\hat{Z}}$ [km]'], 'Interpreter', 'latex')
+xlabel('time [hours]')
 % hold off
 
 subplot(6,1,4)
 plot(t, X(4,:));
 hold on
-ylabel('$v_{\hat{X}}$ [m/s]', 'Interpreter', 'latex')
+ylabel([modifier,'$v_{\hat{X}}$ [km/s]'], 'Interpreter', 'latex')
 % hold off
 
 subplot(6,1,5)
 plot(t, X(5,:));
 hold on
-ylabel('$v_{\hat{Y}}$ [m/s]', 'Interpreter', 'latex')
+ylabel([modifier,'$v_{\hat{Y}}$ [km/s]'], 'Interpreter', 'latex')
 % hold off
 
 subplot(6,1,6)
 plot(t, X(6,:));
 hold on
-ylabel('$v_{\hat{Z}}$ [m/s]', 'Interpreter', 'latex')
+ylabel([modifier,'$v_{\hat{Z}}$ [km/s]'], 'Interpreter', 'latex')
 xlabel('time [hours]')
 % hold off
 
