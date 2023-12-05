@@ -49,7 +49,7 @@ title = "True Trajectory in Inertial Frame";
 plotOrbit(X_sim_N(1:3,:), title)
 
 figure
-title = "States vs. Time";
+title = "States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,X_sim_N,title,"")
 
 % DCMs
@@ -150,7 +150,7 @@ for i = 1:length(time_span)-1
     bigC(i) = {C};
 end
 figure;hold on;
-plotStates(t,X_delta,"$$\delta$$ Linearzied States","$$\delta$$")
+plotStates(t,X_delta,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
 
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
