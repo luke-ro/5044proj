@@ -1,11 +1,15 @@
-function [] = plotMeasurements(t, us, vs, lmks_visible, lmksToPlot)
+function [] = plotMeasurements(t, us, vs, lmks_visible, lmksToPlot, plot_title)
 %PLOTMEASUREMENTS Summary of this function goes here
 %   Detailed explanation goes here
 
-% shapes = ['o','+','*','.','x','square',"diamond",'v','^','>',"Pentagram","Hexagram", "Horizontal line", "Vertical line"];
-shapes = ['o','+','*','.','x','square',"diamond",'v','^','>'];
+t = t/60^2;
+
+shapes = ['o','+','*','.','x','square',"diamond",'v','^','>','Pentagram',"Hexagram"];
+% shapes = ['o','+','*','.','x','square',"diamond",'v','^','>'];
 
 figure
+subplot(2,1,1)
+sgtitle(plot_title)
 hold on
 for i= 1:length(lmksToPlot)
     lmk = lmksToPlot(i);
@@ -14,8 +18,9 @@ for i= 1:length(lmksToPlot)
     scatter(t,u_plot,shapes(mod(i-1,length(shapes))+1));
 end
 legend(split(int2str(lmksToPlot)))
+ylabel("u [pixels]")
 
-figure
+subplot(2,1,2)
 hold on
 for i = 1:length(lmksToPlot)
     lmk = lmksToPlot(i);
@@ -26,5 +31,7 @@ for i = 1:length(lmksToPlot)
 end
 
 legend(split(int2str(lmksToPlot)))
+xlabel("time [hours]")
+ylabel("v [pixels]")
 end
 

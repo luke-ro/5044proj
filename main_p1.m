@@ -97,6 +97,8 @@ r_A = X_sim_A(1:3,:);
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
 scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
+plotMeasurements(t, us, vs, lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
+
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
 
