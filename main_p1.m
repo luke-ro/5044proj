@@ -58,6 +58,7 @@ NA = zeros(3,3,433);
 X_sim_A = zeros(6,433);
 AN = zeros(3,3,433);
 pos_lmks_C = zeros(3,50,433);
+pos_lmks_N = zeros(3,50,433);
 uv = zeros(2,50,433);
 
 
@@ -86,6 +87,9 @@ for i = 1:length(t)
     
     % get a logical vec of true where LMs are within FOV
     lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A, r_A, AC(:,3,i),us(:,i)',vs(:,i)',const.uv_max,const.uv_max);
+
+    pos_lmks_C(:,:,i) = AC(:,:,i)'*pos_lmks_A;
+    pos_lmks_N(:,:,i) = NA(:,:,i)*pos_lmks_A;
 end
 
 % get logical vec vector true where lmks are visible to satellite
@@ -121,9 +125,13 @@ z_1by7 = zeros(1,7);
 X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 
 % X0_delta = [0 0 0 1e7  0 0]';
-X_delta = [X0_delta zeros(6,length(time_span)-1)];
+X_delta_N = [X0_delta zeros(6,length(time_span)-1)];
 X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)];
 X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
+Y_delta_N = cell(1,length(time_span));
+u_delta_N = NaN(length(pos_lmks_A),length(time_span));
+v_delta_N = NaN(length(pos_lmks_A),length(time_span));;
+
 
 
 for i = 1:length(time_span)-1
@@ -139,12 +147,20 @@ for i = 1:length(time_span)-1
 %     F = eye(6) +A*Dt;
 
     %propogate delta state
-    X_delta(:,i+1) = F * X_delta(:,i) + G;
+    X_delta_N(:,i+1) = F * X_delta_N(:,i) + G;
     
     % cacluate C
-    for j = 1:length(pos_lmks_A)
-        C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
+    num_landmarks = sum(lmks_visible(:,i));
+    lmk_idxs = find(lmks_visible(:,i));
+    num_measurements = num_landmarks*2;% (number of landmarks in view)*2 measurements
+    C = zeros(num_measurements,6); 
+    for j = 1:2:num_measurements
+        C(j:j+1,:) = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
     end
+    
+    Y_delta_N(i) = {C*X_delta_N(:,i)};
+    u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
+    v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end);
     
     bigA(:,:,i) = A;
     bigF(:,:,i) = F;
@@ -152,8 +168,11 @@ for i = 1:length(time_span)-1
     bigC(i) = {C};
 end
 figure;hold on;
-plotStates(t,X_delta,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
+plotStates(t,X_delta_N,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
 
+
+figure;hold on;
+scatter(t,u_delta_N(1,:))
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
 
