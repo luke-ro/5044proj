@@ -18,28 +18,35 @@ const.rSA = norm(const.rSA_N); % Distance from Sun to Asteroid
 const.phi0 = 1*10^14; % [kg*km/s^2]
 const.rho = 0.4; % coefficient of reflectivity
 const.AreaMass = 1/62*10^-6; % Area-to-mass ratio
+const.sig_w = 1*10^-9; % [km/s^2]
 const.f = 2089.7959; % [pixels]
 const.u0 = 512; % [pixels]
 const.v0 = 512; % [pixels]
 const.uv_min = 0; % [pixels]
 const.uv_max = 1024; % [pixels]
+const.sig_uv = 0.25; % [pixels]
+const.Dt_obs = 600; % [seconds]
+const.tf_obs = 259200; % [seconds]
+const.Dt_int = 60; % [seconds]
+const.tf_int = 432000; % [seconds]
 
 num_LMKs = 50;
 
 %% Problem 1:
 % Simulate data with nonlinear dynamics and no noise
 
-Dt = 600; % [s]
-time_span = 0:Dt:259200; % [s]
+Dt = const.Dt_obs; % [s]
+time_span = 0:Dt:const.tf_obs; % [s]
 params = [0,0]; %if we need extra constants for our func
 ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
 
-r0_nom_N = [0,-1,0]';
-r0_nom = norm(r0_nom_N);
-v0_nom_N = [0,0,sqrt(const.mu/r0_nom)]';
-X0_nom_N = [r0_nom_N; v0_nom_N];
+const.r0_nom_N = [0,-1,0]';
+r0_nom = norm(const.r0_nom_N);
+const.v0_nom_N = [0,0,sqrt(const.mu/r0_nom)]';
+X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
-ode_fun = @(t,X) dynamics(t,X,params);
+w_tilde = zeros(6,length(0:const.Dt_int:const.tf_int));
+ode_fun = @(t,X) dynamics(t,X,const,w_tilde);
 [t,X_nom_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
 X_nom_N = X_nom_N';
 t = t';
@@ -181,6 +188,6 @@ scatter(t/3600,u_delta_N(1,:))
 % simulate linearized dynamics and compare to the nonlinear case
 
 
-save("data/P1_vars.mat","X_nom_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible");
+save("data/P1_vars.mat","X_nom_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible", "const");
 
 
