@@ -119,6 +119,7 @@ bigA = zeros(6,6,length(time_span));
 bigF = zeros(6,6,length(time_span));
 bigG = zeros(6,1,length(time_span));
 bigC = cell(1,length(time_span));
+bigCsym = cell(1,length(time_span));
 
 % C = zeros(2, 6, time_span);
 z_1by7 = zeros(1,7);
@@ -130,9 +131,9 @@ X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)];
 X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
 Y_delta_N = cell(1,length(time_span));
 u_delta_N = NaN(length(pos_lmks_A),length(time_span));
-v_delta_N = NaN(length(pos_lmks_A),length(time_span));;
+v_delta_N = NaN(length(pos_lmks_A),length(time_span));
 
-
+sym_jacobian_H = makeSymH(const);
 
 for i = 1:length(time_span)-1
     %calcuate jacobian accoring to nominal traj
@@ -154,11 +155,14 @@ for i = 1:length(time_span)-1
     lmk_idxs = find(lmks_visible(:,i));
     num_measurements = num_landmarks*2;% (number of landmarks in view)*2 measurements
     C = zeros(num_measurements,6); 
+    C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
         C(j:j+1,:) = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
+        C_sym(j:j+1,:) = sym_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
+            
     end
     
-    Y_delta_N(i) = {C*X_delta_N(:,i)};
+    Y_delta_N(i) = {C_sym*X_delta_N(:,i)};
     u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
     v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end);
     
@@ -166,13 +170,14 @@ for i = 1:length(time_span)-1
     bigF(:,:,i) = F;
     bigG(:,:,i) = G;
     bigC(i) = {C};
+    bigCsym(i) = {C_sym};
 end
 figure;hold on;
 plotStates(t,X_delta_N,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
 
 
 figure;hold on;
-scatter(t,u_delta_N(1,:))
+scatter(t/3600,u_delta_N(1,:))
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
 
