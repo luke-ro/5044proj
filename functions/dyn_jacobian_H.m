@@ -25,13 +25,13 @@ function [J] = dyn_jacobian_H(x, l, R,const)
     k2 = k(2);
     k3 = k(3);
 
-    J11 = (-dot((l-r),k)*i1+dot(l-r,i)*k1)/(dot(l-r,k))^2;
-    J12 = (-dot((l-r),k)*i2+dot(l-r,i)*k2)/(dot(l-r,k))^2;
-    J13 = (-dot((l-r),k)*i3+dot(l-r,i)*k3)/(dot(l-r,k))^2;
+    J11 = const.f*(-dot((l-r),k)*i1+dot(l-r,i)*k1)/(dot(l-r,k))^2;
+    J12 = const.f*(-dot((l-r),k)*i2+dot(l-r,i)*k2)/(dot(l-r,k))^2;
+    J13 = const.f*(-dot((l-r),k)*i3+dot(l-r,i)*k3)/(dot(l-r,k))^2;
     
-    J21 = (-dot((l-r),k)*j1+dot(l-r,j)*k1)/(dot(l-r,k))^2;
-    J22 = (-dot((l-r),k)*j2+dot(l-r,j)*k2)/(dot(l-r,k))^2;
-    J23 = (-dot((l-r),k)*j3+dot(l-r,j)*k3)/(dot(l-r,k))^2;
+    J21 = const.f*(-dot((l-r),k)*j1+dot(l-r,j)*k1)/(dot(l-r,k))^2;
+    J22 = const.f*(-dot((l-r),k)*j2+dot(l-r,j)*k2)/(dot(l-r,k))^2;
+    J23 = const.f*(-dot((l-r),k)*j3+dot(l-r,j)*k3)/(dot(l-r,k))^2;
     
 %     J21 = (-dot((l-r),k)*i2+dot(l-r,i)*k2)/(dot(l-r,k))^2;
 %     J12 = ((l1 - r1)*(i1*k2-i2*k1) + (l3 - r3)*(i3*k2 - i2*k3))/(dot(l-r,k))^2;
