@@ -157,11 +157,11 @@ for i = 1:length(time_span)-1
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
-        C(j:j+1,:) = dyn_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
-        C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
+        C(j:j+1,:) = dyn_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
+%         C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
     
-    Y_delta_N(i) = {C_sym*X_delta_N(:,i)};
+    Y_delta_N(i) = {C*X_delta_N(:,i)};
     u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
     v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end);
     
@@ -169,7 +169,7 @@ for i = 1:length(time_span)-1
     bigF(:,:,i) = F;
     bigG(:,:,i) = G;
     bigC(i) = {C};
-    bigCsym(i) = {C_sym};
+%     bigCsym(i) = {C_sym};
 end
 figure;hold on;
 plotStates(t,X_delta_N,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
