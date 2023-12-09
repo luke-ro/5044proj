@@ -40,17 +40,17 @@ v0_nom_N = [0,0,sqrt(const.mu/r0_nom)]';
 X0_nom_N = [r0_nom_N; v0_nom_N];
 
 ode_fun = @(t,X) dynamics(t,X,params);
-[t,X_sim_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
-X_sim_N = X_sim_N';
+[t,X_nom_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
+X_nom_N = X_nom_N';
 t = t';
 
 % plot inertial orbit
 title = "True Trajectory in Inertial Frame";
-plotOrbit(X_sim_N(1:3,:), title)
+plotOrbit(X_nom_N(1:3,:), title)
 
 figure
 title = "States vs. Time, Full Nonlinear Dynamics Simulation";
-plotStates(t,X_sim_N,title,"")
+plotStates(t,X_nom_N,title,"")
 
 % DCMs
 NC = R_CtoN;
@@ -72,8 +72,8 @@ for i = 1:length(t)
     NA(:,:,i) = [cos(theta), -sin(theta), 0; sin(theta), cos(theta), 0; 0 0 1];
     AN(:,:,i) = NA(:,:,i)';
 %     X_sim_A(:,i) = blkdiag(AN(:,:,i),AN(:,:,i))*X_sim_N(:,i);
-    r_A = AN(:,:,i)*X_sim_N(1:3,i);
-    v_A = AN(:,:,i)*X_sim_N(4:6,i);
+    r_A = AN(:,:,i)*X_nom_N(1:3,i);
+    v_A = AN(:,:,i)*X_nom_N(4:6,i);
     X_sim_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
@@ -137,7 +137,7 @@ sym_jacobian_H = makeSymH(const);
 
 for i = 1:length(time_span)-1
     %calcuate jacobian accoring to nominal traj
-    A = dyn_jacobian(X_sim_N(:,i),const);
+    A = dyn_jacobian(X_nom_N(:,i),const);
     
     %calcuate f using matrix expm
     Ahat = [A B; z_1by7];
@@ -157,8 +157,8 @@ for i = 1:length(time_span)-1
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
-        C(j:j+1,:) = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
-        C_sym(j:j+1,:) = sym_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
+        C(j:j+1,:) = dyn_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
+        C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
     
     Y_delta_N(i) = {C_sym*X_delta_N(:,i)};
@@ -181,6 +181,6 @@ scatter(t/3600,u_delta_N(1,:))
 % simulate linearized dynamics and compare to the nonlinear case
 
 
-save("data/P1_vars.mat","X_sim_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible");
+save("data/P1_vars.mat","X_nom_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible");
 
 
