@@ -158,8 +158,7 @@ for i = 1:length(time_span)-1
     C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
         C(j:j+1,:) = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
-        C_sym(j:j+1,:) = sym_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));
-            
+        C_sym(j:j+1,:) = sym_jacobian_H(X_sim_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
     
     Y_delta_N(i) = {C_sym*X_delta_N(:,i)};
@@ -180,5 +179,8 @@ figure;hold on;
 scatter(t/3600,u_delta_N(1,:))
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
+
+
+save("data/P1_vars.mat","X_sim_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible");
 
 
