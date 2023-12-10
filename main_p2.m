@@ -32,6 +32,10 @@ plotStates(t,X_sim_N,title,"")
 
 % simulate measurements
 [us, vs, lmks_visible] = simMeasurements(t, X_sim_N, R_CtoN, pos_lmks_A, const);
+
+% generate a y table with the simulated data
+y_table_sim = genYTable(t,us,vs,lmks_visible);
+
 plotMeasurements(t, us, vs, lmks_visible, 1:10, "Simulated noisy measurements")
 
 %% DT simulation
