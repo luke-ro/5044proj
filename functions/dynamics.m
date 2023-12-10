@@ -24,7 +24,8 @@ dX = [v_N; a_N];
 
 % add noise
 if t > 0
-    dX = dX + w_tilde(:,ceil(t/const.Dt_int));
+%     dX = dX + w_tilde(:,ceil(t/const.Dt_int));
+    dX = dX + w_tilde(:,ceil(t/const.Dt_obs));
 end
 
 end
