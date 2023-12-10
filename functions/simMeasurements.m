@@ -39,8 +39,8 @@ for i = 1:length(t)
     
     % add noise
 %     R = diag([const.sig_uv^2, const.sig_uv^2]);
-    v_u = mvnrnd(0, const.sig_uv^2);
-    v_v = mvnrnd(0, const.sig_uv^2);
+    v_u = mvnrnd(zeros(num_LMKs,1), const.sig_uv^2);
+    v_v = mvnrnd(zeros(num_LMKs,1), const.sig_uv^2);
     
     us(:,i) = us(:,i) + v_u;
     vs(:,i) = vs(:,i) + v_v;

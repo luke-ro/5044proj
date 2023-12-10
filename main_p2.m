@@ -12,12 +12,14 @@ load('P1_vars.mat')
 
 n = 6;
 m = 2;
-% npts = length(0:const.Dt_int:const.tf_int);
-npts = length(0:const.Dt_obs:const.tf_obs);
+% npts_int = length(0:const.Dt_int:const.tf_int);
+npts_int = length(0:const.Dt_int:const.tf_obs);
+npts_obs = length(0:const.Dt_obs:const.tf_obs);
 
 %% Simulate full nonlinear dynamics with process noise
-C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
-w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts)';
+% C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
+C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
+w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
 
 [X_sim_N, t] = simNLdynamics(w_tilde, const);
 
@@ -28,21 +30,22 @@ figure
 title = "Simulated Noisy States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,X_sim_N,title,"")
 
+% simulate measurements
+[us, vs, lmks_visible] = simMeasurements(t, X_sim_N, R_CtoN, pos_lmks_A, const);
+plotMeasurements(t, us, vs, lmks_visible, 1:10, "Simulated noisy measurements")
+
 %% DT simulation
 
 gamma = zeros(6,3);
 gamma(4:6,:) = eye(3);
 W = diag([const.sig_w^2,const.sig_w^2,const.sig_w^2]);
 for i = 1:length(bigA)
-    eZ = expm(const.Dt_int*[-bigA(:,:,i), gamma*W*gamma'; zeros(n,n), bigA(:,:,i)']);
+    eZ = expm(const.Dt_obs*[-bigA(:,:,i), gamma*W*gamma'; zeros(n,n), bigA(:,:,i)']);
     Q = eZ(n+1:end, n+1:end)' * eZ(1:n, n+1:end);
-    w = mvnrnd(zeros(1,n), Q, npts);  
+    w = mvnrnd(zeros(1,n), Q, npts_int);  
 end
 
-[us, vs, lmks_visible] = simMeasurements(t, X_sim_N, R_CtoN, pos_lmks_A, const);
-plotMeasurements(t, us, vs, lmks_visible, 10, "Full Nonlinear Measurement Simulation")
 
-% R = diag([sig_uv^2, sig_uv^2]);
-% v_u = mvnrnd(zeros(1,n), Q, npts);
-% v_v = mvnrnd(zeros(1,n), R, npts);
+
+
 
