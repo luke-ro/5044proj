@@ -35,19 +35,23 @@ for i = 1:length(t)
 
     % get the pixel coords of all landmarks
     [us(:,i),vs(:,i)] = uv_func(r_A, pos_lmks_A, AC, const.u0, const.v0);
+    lmks_in_FOV1 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i)', vs(:,i)',const.uv_max,const.uv_max);
     
     % add noise
 %     R = diag([const.sig_uv^2, const.sig_uv^2]);
     v_u = mvnrnd(0, const.sig_uv^2);
     v_v = mvnrnd(0, const.sig_uv^2);
+    
     us(:,i) = us(:,i) + v_u;
     vs(:,i) = vs(:,i) + v_v;
     
     % get a logical vec of true where LMs are within FOV
-    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i)', vs(:,i)',const.uv_max,const.uv_max);
+    lmks_in_FOV2 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i)', vs(:,i)',const.uv_max,const.uv_max);
 
 %     pos_lmks_C(:,:,i) = AC'*pos_lmks_A;
 %     pos_lmks_N(:,:,i) = NA*pos_lmks_A;
+
+    lmks_in_FOV(:,i) = lmks_in_FOV1 & lmks_in_FOV2;
 end
 
 % get logical vec vector true where lmks are visible to satellite
