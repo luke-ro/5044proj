@@ -21,5 +21,15 @@ aSRP = -phi0/rSA^3*(1+4/9*rho)*AreaMass * rSA_N; % solar radiation pressure
 a_N = a2B + aSRP; % total acceleration
 
 dX = [v_N; a_N];
+<<<<<<< Updated upstream
+=======
+
+% add noise
+if t > 0
+%     dX = dX + w_tilde(:,ceil(t/const.Dt_int));
+    dX = dX + w_tilde(:,ceil(t/const.Dt_obs));
+end
+
+>>>>>>> Stashed changes
 end
 
