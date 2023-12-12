@@ -35,10 +35,10 @@ num_LMKs = 50;
 %% Problem 1:
 % Simulate data with nonlinear dynamics and no noise
 
-Dt = const.Dt_obs; % [s]
-time_span = 0:Dt:const.tf_obs; % [s]
-params = [0,0]; %if we need extra constants for our func
-ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
+% Dt = const.Dt_obs; % [s]
+% time_span = 0:Dt:const.tf_obs; % [s]
+% params = [0,0]; %if we need extra constants for our func
+% ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
 
 const.r0_nom_N = [0,-1,0]';
 r0_nom = norm(const.r0_nom_N);
@@ -46,10 +46,15 @@ const.v0_nom_N = [0,0,sqrt(const.mu/r0_nom)]';
 X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
 w_tilde = zeros(6,length(0:const.Dt_int:const.tf_int));
-ode_fun = @(t,X) dynamics(t,X,const,w_tilde);
-[t,X_nom_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
-X_nom_N = X_nom_N';
-t = t';
+% ode_fun = @(t,X) dynamics(t,X,const,w_tilde);
+% [t,X_nom_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
+% X_nom_N = X_nom_N';
+% t = t';
+
+[X_nom_N, t] = simNLdynamics(w_tilde, const);
+
+X_nomObs_N = X_nom_N(:,1:10:length(t));
+t_obs = t(1:10:length(t));
 
 % plot inertial orbit
 title = "True Trajectory in Inertial Frame";
@@ -62,26 +67,26 @@ plotStates(t,X_nom_N,title,"")
 % DCMs
 NC = R_CtoN;
 NA = zeros(3,3,433);
-X_sim_A = zeros(6,433);
+X_nomObs_A = zeros(6,433);
 AN = zeros(3,3,433);
 pos_lmks_C = zeros(3,50,433);
 pos_lmks_N = zeros(3,50,433);
 uv = zeros(2,50,433);
 
 
-lmks_in_FOV = zeros(num_LMKs,length(t));
-lmks_in_front = zeros(num_LMKs,length(t));
+lmks_in_FOV = zeros(num_LMKs,length(t_obs));
+lmks_in_front = zeros(num_LMKs,length(t_obs));
 
-us = zeros(num_LMKs,length(t));
-vs = zeros(num_LMKs,length(t));
-for i = 1:length(t)
-    theta = const.omegaA*t(i);
+us = zeros(num_LMKs,length(t_obs));
+vs = zeros(num_LMKs,length(t_obs));
+for i = 1:length(t_obs)
+    theta = const.omegaA*t_obs(i);
     NA(:,:,i) = [cos(theta), -sin(theta), 0; sin(theta), cos(theta), 0; 0 0 1];
     AN(:,:,i) = NA(:,:,i)';
 %     X_sim_A(:,i) = blkdiag(AN(:,:,i),AN(:,:,i))*X_sim_N(:,i);
-    r_A = AN(:,:,i)*X_nom_N(1:3,i);
-    v_A = AN(:,:,i)*X_nom_N(4:6,i);
-    X_sim_A(:,i) = [r_A;v_A];
+    r_A = AN(:,:,i)*X_nomObs_N(1:3,i);
+    v_A = AN(:,:,i)*X_nomObs_N(4:6,i);
+    X_nomObs_A(:,i) = [r_A;v_A];
     
     CN(:,:,i) = NC(:,:,i)';
     AC(:,:,i) = AN(:,:,i)*NC(:,:,i);
@@ -103,12 +108,12 @@ end
 lmks_visible = lmks_in_FOV & lmks_in_front;
 
 % get position from simulated points
-r_A = X_sim_A(1:3,:);
+r_A = X_nomObs_A(1:3,:);
 
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
 scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
-plotMeasurements(t, us, vs, lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
+plotMeasurements(t_obs, us, vs, lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
 
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
@@ -122,72 +127,88 @@ B = zeros(6,1);
 D = zeros(2,2);
 
 % initialize A and C matrices
-bigA = zeros(6,6,length(time_span));
-bigF = zeros(6,6,length(time_span));
-bigG = zeros(6,1,length(time_span));
-bigC = cell(1,length(time_span));
-bigCsym = cell(1,length(time_span));
+bigA = zeros(6,6,length(t));
+bigF = zeros(6,6,length(t));
+bigG = zeros(6,1,length(t_obs));
+bigC = cell(1,length(t_obs));
+bigCsym = cell(1,length(t_obs));
 
 % C = zeros(2, 6, time_span);
 z_1by7 = zeros(1,7);
 X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 
 % X0_delta = [0 0 0 1e7  0 0]';
-X_delta_N = [X0_delta zeros(6,length(time_span)-1)];
-X_DT_total = [X0_nom_N+X0_delta zeros(6,length(time_span)-1)];
-X_DT_nom = [X0_nom_N zeros(6,length(time_span) - 1)];
-Y_delta_N = cell(1,length(time_span));
-u_delta_N = NaN(length(pos_lmks_A),length(time_span));
-v_delta_N = NaN(length(pos_lmks_A),length(time_span));
+X_delta_N = [X0_delta zeros(6,length(t)-1)];
+X_DT_total = [X0_nom_N+X0_delta zeros(6,length(t)-1)];
+X_DT_nom = [X0_nom_N zeros(6,length(t) - 1)];
+Y_delta_N = cell(1,length(t_obs));
+u_delta_N = NaN(length(pos_lmks_A),length(t_obs));
+v_delta_N = NaN(length(pos_lmks_A),length(t_obs));
 
 sym_jacobian_H = makeSymH(const);
 
-for i = 1:length(time_span)-1
+for i = 1:length(t)-1
     %calcuate jacobian accoring to nominal traj
     A = dyn_jacobian(X_nom_N(:,i),const);
     
     %calcuate f using matrix expm
     Ahat = [A B; z_1by7];
-    phim_hat = expm(Ahat*Dt);
+    phim_hat = expm(Ahat*const.Dt_int);
     F = phim_hat(1:6, 1:6);
     G = phim_hat(1:6, 7);
     
 %     F = eye(6) +A*Dt;
 
     %propogate delta state
-    X_delta_N(:,i+1) = F * X_delta_N(:,i) + G;
+    X_delta_N(:,i+1) = F * X_delta_N(:,i) + G;   
     
-    % cacluate C
+    bigA(:,:,i) = A;
+    bigF(:,:,i) = F;
+end
+
+X_deltaObs_N = X_delta_N(:,1:10:length(t));
+
+for i = 1:length(t_obs)-1
+   % cacluate C
     num_landmarks = sum(lmks_visible(:,i));
     lmk_idxs = find(lmks_visible(:,i));
     num_measurements = num_landmarks*2;% (number of landmarks in view)*2 measurements
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
-        C(j:j+1,:) = dyn_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
+        C(j:j+1,:) = dyn_jacobian_H(X_nomObs_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
 %         C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
     
-    Y_delta_N(i) = {C*X_delta_N(:,i)};
+    Y_delta_N(i) = {C*X_deltaObs_N(:,i)};
     u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
-    v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end);
+    v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end); 
     
-    bigA(:,:,i) = A;
-    bigF(:,:,i) = F;
+    %     bigCsym(i) = {C_sym};
     bigG(:,:,i) = G;
     bigC(i) = {C};
-%     bigCsym(i) = {C_sym};
 end
+
 figure;hold on;
 plotStates(t,X_delta_N,"State Deviations vs. Time, Linearized Dynamics Simulation","$$\delta$$")
 
 
 figure;hold on;
-scatter(t/3600,u_delta_N(1,:))
+subplot(2,1,1)
+sgtitle("Linearized Measurement from State Deviation (Landmark 1)")
+scatter(t_obs/3600,u_delta_N(1,:))
+ylabel("u [pixels]")
+xlabel("Time [hours]")
+grid on
+subplot(2,1,2)
+scatter(t_obs/3600,v_delta_N(1,:))
+xlabel("Time [hours]")
+ylabel("v [pixels]")
+grid on
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case
 
 
-save("data/P1_vars.mat","X_nom_N","X_delta_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible", "const");
+save("data/P1_vars.mat","X_nom_N","X_nomObs_N","X_delta_N","X_deltaObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible", "const");
 
 
