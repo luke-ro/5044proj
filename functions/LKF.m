@@ -19,14 +19,14 @@ for i = 1:npts_obs-1
         [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q(:,:,k));
         k = k+1;
     end
-    [delta_x_plus(:,i), P_plus(:,:,i)] = LKF_measurementUpdate(delta_x_minus, P_minus, delta_y(:,i), H(:,:,i), R(:,:,i));
+    [delta_x_plus(:,i), P_plus(:,:,i)] = LKF_measurementUpdate(delta_x_minus, P_minus, delta_y(:,i), H(:,:,i), R);
 end
 
 % count = 1;
 % for k = 1:npts_int-1
 %     [delta_x_minus(:,k+1), P_minus(:,:,k+1)] = LKF_dynamicPrediction(delta_x(:,k), P_minus(:,:,k), F(:,:,k), Q(:,:,k));
 %     if mod(npts_int/npts_obs, k) == 0
-%         [delta_x_plus(:,count), P_plus(:,:,count)] = LKF_measurementUpdate(delta_x_minus(:,k), P_minus(:,:,k), delta_y(:,count), H(:,:,count), R(:,:,count));
+%         [delta_x_plus(:,count), P_plus(:,:,count)] = LKF_measurementUpdate(delta_x_minus(:,k), P_minus(:,:,k), delta_y(:,count), H(:,:,count), R);
 %         count = count + 1;
 %     end
 % end

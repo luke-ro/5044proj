@@ -1,4 +1,4 @@
-function [X_sim_N, t] = simNLdynamics(w_tilde, const)
+function [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, const)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -11,5 +11,8 @@ ode_fun = @(t,X) dynamics(t,X,const,w_tilde);
 [t,X_sim_N] = ode45(ode_fun,time_span,X0_nom_N,ode_options);
 X_sim_N = X_sim_N';
 t = t';
+
+X_simObs_N = X_sim_N(:,1:10:length(t));
+t_obs = t(1:10:length(t));
 end
 

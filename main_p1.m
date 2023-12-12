@@ -77,8 +77,8 @@ uv = zeros(2,50,433);
 lmks_in_FOV = zeros(num_LMKs,length(t_obs));
 lmks_in_front = zeros(num_LMKs,length(t_obs));
 
-us = zeros(num_LMKs,length(t_obs));
-vs = zeros(num_LMKs,length(t_obs));
+u_nom = zeros(num_LMKs,length(t_obs));
+v_nom = zeros(num_LMKs,length(t_obs));
 for i = 1:length(t_obs)
     theta = const.omegaA*t_obs(i);
     NA(:,:,i) = [cos(theta), -sin(theta), 0; sin(theta), cos(theta), 0; 0 0 1];
@@ -95,17 +95,17 @@ for i = 1:length(t_obs)
     lmks_in_front(:,i) = getLMsInFront(CN(:,:,i),NA(:,:,i),pos_lmks_A);
 
     % get the pixel coords of all landmarks
-    [us(:,i),vs(:,i)] = uv_func(r_A, pos_lmks_A, AC(:,:,i),const.u0,const.v0);
+    [u_nom(:,i),v_nom(:,i)] = uv_func(r_A, pos_lmks_A, AC(:,:,i),const.u0,const.v0);
     
     % get a logical vec of true where LMs are within FOV
-    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A, r_A, AC(:,3,i),us(:,i)',vs(:,i)',const.uv_max,const.uv_max);
+    lmks_in_FOV(:,i) = getLMsInFOV(pos_lmks_A, r_A, AC(:,3,i),u_nom(:,i)',v_nom(:,i)',const.uv_max,const.uv_max);
 
     pos_lmks_C(:,:,i) = AC(:,:,i)'*pos_lmks_A;
     pos_lmks_N(:,:,i) = NA(:,:,i)*pos_lmks_A;
 end
 
 % get logical vec vector true where lmks are visible to satellite
-lmks_visible = lmks_in_FOV & lmks_in_front;
+nom_lmks_visible = lmks_in_FOV & lmks_in_front;
 
 % get position from simulated points
 r_A = X_nomObs_A(1:3,:);
@@ -113,7 +113,7 @@ r_A = X_nomObs_A(1:3,:);
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
 scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
-plotMeasurements(t_obs, us, vs, lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
+plotMeasurements(t_obs, u_nom, v_nom, nom_lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
 
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
@@ -170,8 +170,8 @@ X_deltaObs_N = X_delta_N(:,1:10:length(t));
 
 for i = 1:length(t_obs)-1
    % cacluate C
-    num_landmarks = sum(lmks_visible(:,i));
-    lmk_idxs = find(lmks_visible(:,i));
+    num_landmarks = sum(nom_lmks_visible(:,i));
+    lmk_idxs = find(nom_lmks_visible(:,i));
     num_measurements = num_landmarks*2;% (number of landmarks in view)*2 measurements
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
@@ -209,6 +209,6 @@ grid on
 % simulate linearized dynamics and compare to the nonlinear case
 
 
-save("data/P1_vars.mat","X_nom_N","X_nomObs_N","X_delta_N","X_deltaObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N","lmks_visible", "const");
+save("data/P1_vars.mat","X_nom_N","X_nomObs_N","X_delta_N","X_deltaObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N", "u_nom", "v_nom","nom_lmks_visible", "const");
 
 
