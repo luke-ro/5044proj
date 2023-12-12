@@ -132,7 +132,6 @@ for i = 1:length(time_span)
 %     X_DT_total(:,i+1) = F * (X_sim_N(:,i)+X_delta(:,i));
     X_delta(:,i+1) = X_DT_total(:,i+1) - X_DT_nom(:,i);
 
-<<<<<<< Updated upstream
     bigA(:,:,i) = A;
     bigF(:,:,i) = F;
     bigG(:,:,i) = G;
@@ -140,7 +139,6 @@ for i = 1:length(time_span)
     for j = 1:length(pos_lmks_A)
         C = dyn_jacobian_H(X_sim_N(:,i), pos_lmks_C(:,j,i), R_CtoN(:,:,i));
     end
-=======
     %propogate delta state
     X_delta_N(:,i+1) = F * X_delta_N(:,i) + G;
     
@@ -154,6 +152,11 @@ for i = 1:length(time_span)
         C(j:j+1,:) = dyn_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
 %         C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
+
+    H = nan(100,6);
+    for j = 1:2:100
+        H((j:j+1)*lmks_visible,:) = dyn_jacobian_H(X_nomObs_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
+    end
     
     Y_delta_N(i) = {C*X_delta_N(:,i)};
     u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
@@ -164,7 +167,7 @@ for i = 1:length(time_span)
     bigG(:,:,i) = G;
     bigC(i) = {C};
 %     bigCsym(i) = {C_sym};
->>>>>>> Stashed changes
+    bigH(i) = {H};
 end
 X_DT_nom = X_DT_nom(:,1:end-1);
 X_DT_total = X_DT_total(:,1:end-1);
