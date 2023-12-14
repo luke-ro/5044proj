@@ -14,5 +14,8 @@ t = t';
 
 X_simObs_N = X_sim_N(:,1:10:length(t));
 t_obs = t(1:10:length(t));
+
+
+
 end
 
