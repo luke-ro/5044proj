@@ -13,3 +13,5 @@ for i = 1:n
     row = row_end+1;
 end
 
+tab = tab(1:row-1,:);
+
