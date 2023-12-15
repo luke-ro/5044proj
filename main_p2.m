@@ -41,13 +41,13 @@ plotStates(t,X_sim_N-X_nom_N,title2,"$$\delta$$")
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 
-% % test with no process noise
-% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
-% uv_stacked_sim = stackUsVs(us,vs);
-% uv_stacked_nom = stackUsVs(u_nom,v_nom);
+% test with no process noise
+[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+uv_stacked_sim = stackUsVs(us,vs);
+uv_stacked_nom = stackUsVs(u_nom,v_nom);
 
-% y_delta_sim = uv_stacked_sim - uv_stacked_nom;
-y_delta_sim = zeros(size(uv_stacked_nom));
+y_delta_sim = uv_stacked_sim - uv_stacked_nom;
+% y_delta_sim = zeros(size(uv_stacked_nom));
 
 % generate a y table with the simulated data
 y_table_sim = genYTable(t_obs,us,vs,(sim_lmks_visible & nom_lmks_visible));
