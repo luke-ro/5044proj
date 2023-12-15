@@ -1,4 +1,4 @@
-function [delta_x_plus, P_plus] = LKF(delta_x0, P0, delta_y, lmks_in_view_sim, F, Q, H_all, R)
+function [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_x0, P0, delta_y, lmks_in_view_sim, F, Q, H_all, R, x_nomObs_N)
 %LKF Linearized Kalman Filter
 %   delta_y: cell array of stacked us and vs from simulated trajectorye
 %   lmks_in_view: which landmarks are in the measurenemts delta_y
@@ -21,7 +21,6 @@ for i=1:length(H_all)
     idxs_us = 2*(idxs_lmks-1)+1;
     idxs_vs = 2*(idxs_lmks-1)+2;
     idxs_H = sort([idxs_us;idxs_vs]);
-    i
     H{i} = H_all{i}(idxs_H,:);
 end
 
@@ -33,22 +32,31 @@ P_plus = zeros(n,n,npts_obs);
 delta_x_plus(:,1) = delta_x0;
 P_plus(:,:,1) = P0;
 k = 1;
+delta_x_minus = delta_x0;
+P_minus = P0;
 for i = 1:npts_obs-1
     for j = 1:10
-        [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q(:,:,k));
+        [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q);
         k = k+1;
+%         invPyykp1 = inv(P_minus);
     end
-    [delta_x_plus(:,i), P_plus(:,:,i)] = LKF_measurementUpdate(delta_x_minus, P_minus, delta_y(:,i), H(:,:,i), R);
+    dy = zeros(2*sum(lmks_in_view_sim(:,i)),1);
+    dy(1:2:100) = lmks_in_view_sim(:,i);
+    dy(2:2:100) = lmks_in_view_sim(:,i);
+    dy_vis = delta_y(find(dy==1),i);
+    [delta_x_plus(:,i), P_plus(:,:,i), innov_plus, S_k] = LKF_measurementUpdate(delta_x_minus, P_minus, dy_vis, H{i}, R);
+    
+    invPkp1 = inv(P_plus(:,:,i));
+    NEES(i) = (x_nomObs_N(:,i) - delta_x_plus(:,i))'*invPkp1*(x_nomObs_N(:,i) - delta_x_plus(:,i));
+    
+    invP_minus = inv(P_minus);
+    big_invP_minus = invP_minus;
+    for k = 1:length(innov_plus)/n-1
+        big_invP_minus = blkdiag(big_invP_minus, invP_minus);
+    end
+    NIS(i) = innov_plus'*S_k*innov_plus; 
 end
 
-% count = 1;
-% for k = 1:npts_int-1
-%     [delta_x_minus(:,k+1), P_minus(:,:,k+1)] = LKF_dynamicPrediction(delta_x(:,k), P_minus(:,:,k), F(:,:,k), Q(:,:,k));
-%     if mod(npts_int/npts_obs, k) == 0
-%         [delta_x_plus(:,count), P_plus(:,:,count)] = LKF_measurementUpdate(delta_x_minus(:,k), P_minus(:,:,k), delta_y(:,count), H(:,:,count), R);
-%         count = count + 1;
-%     end
-% end
 
 end
 

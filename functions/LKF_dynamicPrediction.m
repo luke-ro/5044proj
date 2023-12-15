@@ -6,5 +6,6 @@ P = F*P0*F' + Q; % double check that we don't need gamma
 
 % ensure it stays positive definite
 P = 1/2*(P + P');
+
 end
 
