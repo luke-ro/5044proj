@@ -1,10 +1,29 @@
-function [delta_x_plus, P_plus] = LKF(delta_x0, P0, delta_y, F, Q, H, R)
+function [delta_x_plus, P_plus] = LKF(delta_x0, P0, delta_y, lmks_in_view_sim, F, Q, H_all, R)
 %LKF Linearized Kalman Filter
-%   Detailed explanation goes here
+%   delta_y: cell array of stacked us and vs from simulated trajectorye
+%   lmks_in_view: which landmarks are in the measurenemts delta_y
+%   F: linearized dyanmics
+%   Q:
+%   H_all: for all us and vs regardless of if theyre in view or not (need
+%       to get rid of extra landmark elemts
+%   R:
+
+
 
 n = length(delta_x0);
 npts_obs = length(delta_y);
 % npts_int = length(F);
+
+%calculate H from sim data
+H = cell(npts_obs,1);
+for i=1:length(H_all)
+    idxs_lmks = find(lmks_in_view_sim(:,i));
+    idxs_us = 2*(idxs_lmks-1)+1;
+    idxs_vs = 2*(idxs_lmks-1)+2;
+    idxs_H = sort([idxs_us;idxs_vs]);
+    i
+    H{i} = H_all{i}(idxs_H,:);
+end
 
 % preallocate vectors
 delta_x_plus = zeros(n,npts_obs);

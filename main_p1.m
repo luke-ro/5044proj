@@ -130,8 +130,8 @@ D = zeros(2,2);
 bigA = zeros(6,6,length(t));
 bigF = zeros(6,6,length(t));
 bigG = zeros(6,1,length(t_obs));
-bigC = cell(1,length(t_obs));
-bigCsym = cell(1,length(t_obs));
+bigC = cell(1,length(t_obs)-1);
+bigCsym = cell(1,length(t_obs)-1);
 
 % C = zeros(2, 6, time_span);
 z_1by7 = zeros(1,7);
@@ -199,13 +199,13 @@ figure;hold on;
 subplot(2,1,1)
 sgtitle("Linearized Measurement from State Deviation (Landmark 1)")
 scatter(t_obs/3600,u_delta_N(1,:))
-ylabel("u [pixels]")
+ylabel("$\delta$ u [pixels]", "Interpreter", "latex")
 xlabel("Time [hours]")
 grid on
 subplot(2,1,2)
 scatter(t_obs/3600,v_delta_N(1,:))
 xlabel("Time [hours]")
-ylabel("v [pixels]")
+ylabel("$\delta$ v [pixels]", "Interpreter", "latex")
 grid on
 %% Problem 4 Compare nonlinear to linear
 % simulate linearized dynamics and compare to the nonlinear case

@@ -32,6 +32,10 @@ plotStates(t,X_sim_N,title,"")
 
 % simulate measurements
 [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
+uv_stacked_sim = stackUsVs(us,vs);
+uv_stacked_nom = stackUsVs(u_nom,v_nom);
+
+y_delta_sim = uv_stacked_sim - uv_stacked_nom;
 
 % generate a y table with the simulated data
 y_table_sim = genYTable(t_obs,us,vs,(sim_lmks_visible & nom_lmks_visible));
@@ -58,5 +62,6 @@ P0 = zeros(3,3);
 % delta_y = (y_table_sim(:,3:4) - y_table_nom(:,3:4))';
 % [delta_x_plus, P_plus] = LKF(delta_X0, P0, delta_y, bigF, Q, bigC, R);
 
-
+%THIS IS WRONG!!!!
+LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R)
 
