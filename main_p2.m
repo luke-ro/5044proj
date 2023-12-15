@@ -21,8 +21,9 @@ npts_obs = length(0:const.Dt_obs:const.tf_obs);
 % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
 C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
 w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
+X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
-[X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, const);
+[X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
 
 % plot inertial orbit
 title1 = "Simulated Noisy Trajectory in Inertial Frame";
@@ -56,22 +57,24 @@ for i = 1:length(bigA)
 %     w = mvnrnd(zeros(1,n), Q, npts_int);  
 end
 
-R = diag([const.sig_uv^2, const.sig_uv^2]);
-delta_X0 = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
-P0 = zeros(3,3);
+% R = diag([const.sig_uv^2, const.sig_uv^2]);
+% delta_X0 = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
+delta_X0 = zeros(6,1);
+% P0 = zeros(3,3);
 % NOT properly accounting for time steps and visible landmarks together yet
 % delta_y = (y_table_sim(:,3:4) - y_table_nom(:,3:4))';
 % [delta_x_plus, P_plus] = LKF(delta_X0, P0, delta_y, bigF, Q, bigC, R);
 
-delta_x0 = X_deltaObs_N(:,1);
+% delta_x0 = X_deltaObs_N(:,1);
 P0 = 0.5*eye(6);
 R = diag([const.sig_uv^2, const.sig_uv^2]);
-Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
-                     0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
-                     0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
-                     const.Dt_int^2/2 0 0 const.Dt_int 0 0;
-                     0 const.Dt_int^2/2 0 0 const.Dt_int 0;
-                     0 0 const.Dt_int^2/2 0 0 const.Dt_int];
+% Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
+%                      0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
+%                      0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
+%                      const.Dt_int^2/2 0 0 const.Dt_int 0 0;
+%                      0 const.Dt_int^2/2 0 0 const.Dt_int 0;
+%                      0 0 const.Dt_int^2/2 0 0 const.Dt_int];
+
 % Q = const.sig_w^2 * [600^3/3 0 0 600^2/2 0 0;
 %                      0 600^3/3 0 0 600^2/2 0;
 %                      0 0 600^3/3 0 0 600^2/2;

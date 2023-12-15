@@ -36,7 +36,7 @@ delta_x_minus = delta_x0;
 P_minus = P0;
 for i = 1:npts_obs-1
     for j = 1:10
-        [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q);
+        [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q(:,:,k));
         k = k+1;
 %         invPyykp1 = inv(P_minus);
     end
