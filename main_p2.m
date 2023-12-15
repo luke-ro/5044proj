@@ -4,7 +4,7 @@
 
 clear
 close all
-warning off
+% warning off
 
 addpath('./functions/');
 addpath('./Data/');
@@ -19,7 +19,8 @@ npts_obs = length(0:const.Dt_obs:const.tf_obs);
 
 %% Simulate full nonlinear dynamics with process noise
 % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
-C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
+C_w_tilde = diag([zeros(1,3), (const.sig_w^2/100)*ones(1,3)]);
+% C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
 w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
 X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
@@ -31,13 +32,22 @@ plotOrbit(X_sim_N(1:3,:), title1)
 figure
 title2 = "Simulated Noisy States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,X_sim_N,title2,"")
+figure
+title2 = "Simulated Noisy Perturbation States vs. Time, Full Nonlinear Dynamics Simulation";
+plotStates(t,X_sim_N-X_nom_N,title2,"$$\delta$$")
 
 % simulate measurements
 [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 
-y_delta_sim = uv_stacked_sim - uv_stacked_nom;
+% % test with no process noise
+% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+% uv_stacked_sim = stackUsVs(us,vs);
+% uv_stacked_nom = stackUsVs(u_nom,v_nom);
+
+% y_delta_sim = uv_stacked_sim - uv_stacked_nom;
+y_delta_sim = zeros(size(uv_stacked_nom));
 
 % generate a y table with the simulated data
 y_table_sim = genYTable(t_obs,us,vs,(sim_lmks_visible & nom_lmks_visible));
@@ -47,33 +57,37 @@ plotMeasurements(t_obs, us, vs, sim_lmks_visible, 1:10, "Simulated noisy measure
 
 %% DT simulation
 
-gamma = zeros(6,3);
-gamma(4:6,:) = eye(3);
-W = diag([const.sig_w^2,const.sig_w^2,const.sig_w^2]);
-Q = zeros(size(bigA));
-for i = 1:length(bigA)
-    eZ = expm(const.Dt_int*[-bigA(:,:,i), gamma*W*gamma'; zeros(n,n), bigA(:,:,i)']);
-    Q(:,:,i) = eZ(n+1:end, n+1:end)' * eZ(1:n, n+1:end);
-%     w = mvnrnd(zeros(1,n), Q, npts_int);  
-end
+gamma = zeros(6,6);
+gamma(4:6,4:6) = eye(3);
+OMEGA = const.Dt_int*gamma;
+
+% W = diag([const.sig_w^2,const.sig_w^2,const.sig_w^2]);
+% Q = zeros(size(bigA));
+% for i = 1:length(bigA)
+%     eZ = expm(const.Dt_int*[-bigA(:,:,i), gamma*W*gamma'; zeros(n,n), bigA(:,:,i)']);
+%     Q(:,:,i) = eZ(n+1:end, n+1:end)' * eZ(1:n, n+1:end);
+% %     w = mvnrnd(zeros(1,n), Q, npts_int);  
+% end
 
 % R = diag([const.sig_uv^2, const.sig_uv^2]);
 % delta_X0 = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 delta_X0 = zeros(6,1);
+% delta_X0 = zeros(6,1);
 % P0 = zeros(3,3);
 % NOT properly accounting for time steps and visible landmarks together yet
 % delta_y = (y_table_sim(:,3:4) - y_table_nom(:,3:4))';
 % [delta_x_plus, P_plus] = LKF(delta_X0, P0, delta_y, bigF, Q, bigC, R);
 
 % delta_x0 = X_deltaObs_N(:,1);
-P0 = 0.5*eye(6);
+% P0 = 0.5*eye(6);
+P0 = blkdiag(0.01*eye(3), 1e-6*eye(3));
 R = diag([const.sig_uv^2, const.sig_uv^2]);
-% Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
-%                      0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
-%                      0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
-%                      const.Dt_int^2/2 0 0 const.Dt_int 0 0;
-%                      0 const.Dt_int^2/2 0 0 const.Dt_int 0;
-%                      0 0 const.Dt_int^2/2 0 0 const.Dt_int];
+Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
+                     0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
+                     0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
+                     const.Dt_int^2/2 0 0 const.Dt_int 0 0;
+                     0 const.Dt_int^2/2 0 0 const.Dt_int 0;
+                     0 0 const.Dt_int^2/2 0 0 const.Dt_int];
 
 % Q = const.sig_w^2 * [600^3/3 0 0 600^2/2 0 0;
 %                      0 600^3/3 0 0 600^2/2 0;
@@ -82,7 +96,8 @@ R = diag([const.sig_uv^2, const.sig_uv^2]);
 %                      0 600^2/2 0 0 600 0;
 %                      0 0 600^2/2 0 0 600];
 
-[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
+% [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
+[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, X_nomObs_N);
 
 figure
 plotStates(t_obs,delta_x_plus,"","")
@@ -92,6 +107,7 @@ hold on
 plot(t_obs,delta_x_plus(1,:))
 plot(t_obs,2*sqrt(squeeze(P_plus(1,1,:))))
 plot(t_obs,-2*sqrt(squeeze(P_plus(1,1,:))))
+% ylim([-20,20])
 hold off
 
 
