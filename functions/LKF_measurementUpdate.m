@@ -6,12 +6,14 @@ n = length(delta_x_minus);
 m = length(delta_y);
 
 R_single = R;
-for i = 1:length(H)/2-1
+for i = 1:size(H,1)/2-1
     R = blkdiag(R, R_single);
 end
-invTerm = (H*P_minus*H' + R)\eye(size(H*P_minus*H' + R));
+% invTerm = (H*P_minus*H' + R)\eye(size(H*P_minus*H' + R));
+invTerm = inv(H*P_minus*H' + R);
 K = (P_minus * H') * invTerm;
 innov_plus = delta_y - H*delta_x_minus;
+% innov_plus = delta_y;
 delta_x_plus = delta_x_minus + K*innov_plus; 
 P_plus = (eye(n,n) - K*H)*P_minus;
 
