@@ -170,8 +170,10 @@ X_deltaObs_N = X_delta_N(:,1:10:length(t));
 
 for i = 1:length(t_obs)-1
    % cacluate C
-    num_landmarks = sum(nom_lmks_visible(:,i));
-    lmk_idxs = find(nom_lmks_visible(:,i));
+%     num_landmarks = sum(nom_lmks_visible(:,i));
+%     lmk_idxs = find(nom_lmks_visible(:,i));
+    num_landmarks = 50;
+    lmk_idxs = 1:50;
     num_measurements = num_landmarks*2;% (number of landmarks in view)*2 measurements
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
