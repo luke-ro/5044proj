@@ -12,7 +12,7 @@ end
 % invTerm = (H*P_minus*H' + R)\eye(size(H*P_minus*H' + R));
 % invTerm = inv(H*P_minus*H' + R);
 % K = (P_minus * H') * invTerm;
-K = (P_minus * H') * inv(H*P_minus*H' + R);
+K = P_minus * H' * inv(H*P_minus*H' + R);
 innov_plus = delta_y - H*delta_x_minus;
 % innov_plus = delta_y;
 delta_x_plus = delta_x_minus + K*innov_plus; 

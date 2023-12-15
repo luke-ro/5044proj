@@ -38,17 +38,17 @@ X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 X0 = X0_nom_N + X0_delta;
 [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(zeros(6,6,npts_int), X0, const);
 % simulate measurements
-[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 % -------------------------------------------------------------------------
 
 deltaX_sim_N = X_sim_N - X_nom_N;
 y_delta_sim = uv_stacked_sim - uv_stacked_nom;
-
-% generate a y table with the simulated data
-y_table_sim = genYTable(t_obs,us,vs,(sim_lmks_visible & nom_lmks_visible));
-y_table_nom = genYTable(t_obs,u_nom,v_nom,(sim_lmks_visible & nom_lmks_visible));
+% 
+% % generate a y table with the simulated data
+% y_table_sim = genYTable(t_obs,us,vs,(sim_lmks_visible & nom_lmks_visible));
+% y_table_nom = genYTable(t_obs,u_nom,v_nom,(sim_lmks_visible & nom_lmks_visible));
 
 % plot inertial orbit
 title1 = "Simulated Noisy Trajectory in Inertial Frame";
@@ -61,7 +61,7 @@ figure
 title2 = "Simulated Noisy Perturbation States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,deltaX_sim_N,title2,"$$\delta$$")
 
-plotMeasurements(t_obs, us, vs, sim_lmks_visible, 1:10, "Simulated noisy measurements")
+plotMeasurements(t_obs(2:end), us, vs, sim_lmks_visible, 1:10, "Simulated noisy measurements")
 
 %% DT simulation
 

@@ -107,13 +107,15 @@ end
 % get logical vec vector true where lmks are visible to satellite
 nom_lmks_visible = lmks_in_FOV & lmks_in_front;
 
+[u_nom, v_nom, nom_lmks_visible] = simMeasurements(t_obs, X_nom_N, NC, pos_lmks_A, const);
+
 % get position from simulated points
 r_A = X_nomObs_A(1:3,:);
 
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
 scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
-plotMeasurements(t_obs, u_nom, v_nom, nom_lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
+plotMeasurements(t_obs(2:end), u_nom, v_nom, nom_lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
 
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
@@ -178,11 +180,11 @@ for i = 1:length(t_obs)-1
     C = zeros(num_measurements,6); 
     C_sym = zeros(num_measurements,6); 
     for j = 1:2:num_measurements
-        C(j:j+1,:) = dyn_jacobian_H(X_nomObs_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i), const);
+        C(j:j+1,:) = dyn_jacobian_H(X_nomObs_N(:,i+1), pos_lmks_N(:,lmk_idxs((j+1)/2),i+1), NC(:,:,i+1), const);
 %         C_sym(j:j+1,:) = sym_jacobian_H(X_nom_N(:,i), pos_lmks_N(:,lmk_idxs((j+1)/2),i), NC(:,:,i));      
     end
     
-    Y_delta_N(i) = {C*X_deltaObs_N(:,i)};
+    Y_delta_N(i) = {C*X_deltaObs_N(:,i+1)};
     u_delta_N(lmk_idxs,i) = Y_delta_N{i}(1:2:end);
     v_delta_N(lmk_idxs,i) = Y_delta_N{i}(2:2:end); 
     

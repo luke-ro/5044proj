@@ -4,21 +4,17 @@ function [us, vs, lmks_visible] = simMeasurements(t, X_sim_N, NC, pos_lmks_A, co
 
 num_LMKs = 50;
 % n = 6;
-% npts = length(t);
+npts = length(t)-1;
 
-% NA = zeros(3,3,433);
-X_sim_A = zeros(6,433);
-% AN = zeros(3,3,433);
-% pos_lmks_C = zeros(3,50,433);
-% pos_lmks_N = zeros(3,50,433);
+X_sim_A = zeros(6,npts);
 
-lmks_in_FOV = zeros(num_LMKs,length(t));
-lmks_in_front = zeros(num_LMKs,length(t));
+lmks_in_FOV = zeros(num_LMKs,npts);
+lmks_in_front = zeros(num_LMKs,npts);
 
-us = zeros(num_LMKs,length(t));
-vs = zeros(num_LMKs,length(t));
+us = zeros(num_LMKs,npts);
+vs = zeros(num_LMKs,npts);
 
-for i = 1:length(t)
+for i = 2:length(t)
     theta = const.omegaA*t(i);
     NA = [cos(theta), -sin(theta), 0; sin(theta), cos(theta), 0; 0 0 1];
     AN = NA';
@@ -31,27 +27,27 @@ for i = 1:length(t)
     AC = AN*NC(:,:,i);
     
     % get a logical vec of true where landmarks are in "front" of benu
-    lmks_in_front(:,i) = getLMsInFront(CN,NA,pos_lmks_A);
+    lmks_in_front(:,i-1) = getLMsInFront(CN,NA,pos_lmks_A);
 
     % get the pixel coords of all landmarks
-    [us(:,i),vs(:,i)] = uv_func(r_A, pos_lmks_A, AC, const.u0, const.v0);
-    lmks_in_FOV1 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i)', vs(:,i)',const.uv_max,const.uv_max);
+    [us(:,i-1),vs(:,i-1)] = uv_func(r_A, pos_lmks_A, AC, const.u0, const.v0);
+    lmks_in_FOV1 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i-1)', vs(:,i-1)',const.uv_max,const.uv_max);
     
     % add noise
 %     R = diag([const.sig_uv^2, const.sig_uv^2]);
     v_u = mvnrnd(zeros(num_LMKs,1), const.sig_uv^2);
     v_v = mvnrnd(zeros(num_LMKs,1), const.sig_uv^2);
     
-    us(:,i) = us(:,i) + v_u;
-    vs(:,i) = vs(:,i) + v_v;
+    us(:,i-1) = us(:,i-1) + v_u;
+    vs(:,i-1) = vs(:,i-1) + v_v;
     
     % get a logical vec of true where LMs are within FOV
-    lmks_in_FOV2 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i)', vs(:,i)',const.uv_max,const.uv_max);
+    lmks_in_FOV2 = getLMsInFOV(pos_lmks_A, r_A, AC(:,3), us(:,i-1)', vs(:,i-1)',const.uv_max,const.uv_max);
 
 %     pos_lmks_C(:,:,i) = AC'*pos_lmks_A;
 %     pos_lmks_N(:,:,i) = NA*pos_lmks_A;
 
-    lmks_in_FOV(:,i) = lmks_in_FOV1 & lmks_in_FOV2;
+    lmks_in_FOV(:,i-1) = lmks_in_FOV1 & lmks_in_FOV2;
 end
 
 % get logical vec vector true where lmks are visible to satellite
