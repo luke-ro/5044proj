@@ -168,7 +168,7 @@ end
 
 X_deltaObs_N = X_delta_N(:,1:10:length(t));
 
-for i = 1:length(t_obs)-1
+for i = 1:length(t_obs)
    % cacluate C
 %     num_landmarks = sum(nom_lmks_visible(:,i));
 %     lmk_idxs = find(nom_lmks_visible(:,i));
