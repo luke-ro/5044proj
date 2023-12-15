@@ -25,6 +25,7 @@ w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
 X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
 [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
+deltaX_sim_N = X_sim_N - X_nom_N;
 
 % plot inertial orbit
 title1 = "Simulated Noisy Trajectory in Inertial Frame";
@@ -34,17 +35,17 @@ title2 = "Simulated Noisy States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,X_sim_N,title2,"")
 figure
 title2 = "Simulated Noisy Perturbation States vs. Time, Full Nonlinear Dynamics Simulation";
-plotStates(t,X_sim_N-X_nom_N,title2,"$$\delta$$")
+plotStates(t,deltaX_sim_N,title2,"$$\delta$$")
 
 % simulate measurements
 [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 
-% test with no process noise
-[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
-uv_stacked_sim = stackUsVs(us,vs);
-uv_stacked_nom = stackUsVs(u_nom,v_nom);
+% % test with no process noise
+% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+% uv_stacked_sim = stackUsVs(us,vs);
+% uv_stacked_nom = stackUsVs(u_nom,v_nom);
 
 y_delta_sim = uv_stacked_sim - uv_stacked_nom;
 % y_delta_sim = zeros(size(uv_stacked_nom));
@@ -71,8 +72,8 @@ OMEGA = const.Dt_int*gamma;
 
 % R = diag([const.sig_uv^2, const.sig_uv^2]);
 % delta_X0 = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
-delta_X0 = zeros(6,1);
 % delta_X0 = zeros(6,1);
+delta_X0 = deltaX_sim_N(:,1);
 % P0 = zeros(3,3);
 % NOT properly accounting for time steps and visible landmarks together yet
 % delta_y = (y_table_sim(:,3:4) - y_table_nom(:,3:4))';
@@ -97,7 +98,7 @@ Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
 %                      0 0 600^2/2 0 0 600];
 
 % [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
-[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, X_nomObs_N);
+[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, X_simObs_N);
 
 figure
 plotStates(t_obs,delta_x_plus,"","")
@@ -107,6 +108,7 @@ hold on
 plot(t_obs,delta_x_plus(1,:))
 plot(t_obs,2*sqrt(squeeze(P_plus(1,1,:))))
 plot(t_obs,-2*sqrt(squeeze(P_plus(1,1,:))))
+plot(t, X_sim_N(1,:)-X_nom_N(1,:))
 % ylim([-20,20])
 hold off
 

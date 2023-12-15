@@ -51,7 +51,7 @@ w_tilde = zeros(6,length(0:const.Dt_int:const.tf_int));
 % X_nom_N = X_nom_N';
 % t = t';
 
-[X_nom_N, t] = simNLdynamics(w_tilde, const);
+[X_nom_N, t] = simNLdynamics(w_tilde, X0_nom_N, const);
 
 X_nomObs_N = X_nom_N(:,1:10:length(t));
 t_obs = t(1:10:length(t));
@@ -211,6 +211,7 @@ grid on
 % simulate linearized dynamics and compare to the nonlinear case
 
 
-save("data/P1_vars.mat","X_nom_N","X_nomObs_N","X_delta_N","X_deltaObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N", "u_nom", "v_nom","nom_lmks_visible", "const");
+% save("data/P1_vars.mat","X_nom_N","X_nomObs_N","X_delta_N","X_deltaObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N", "u_nom", "v_nom","nom_lmks_visible", "const");
+save("data/P1_vars.mat","X_nom_N","X_nomObs_N","Y_delta_N","bigA","bigF","bigC","pos_lmks_N", "u_nom", "v_nom","nom_lmks_visible", "const");
 
 
