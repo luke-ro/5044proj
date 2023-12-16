@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = calcNEESNIS(n_runs, t_obs, P0, w_tilde, Qkf, R, OMEGA, alpha_nees, alpha_nis, const)
+function [outputArg1,outputArg2] = calcNEESNIS(n_runs, t_obs, P0, C_w_tilde, Qkf, R, OMEGA, alpha_nees, alpha_nis, const)
 %CALCNEES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -18,7 +18,7 @@ NIS_hist = zeros(n_runs,length(t_obs)-1);
 for i = 1:n_runs
     % calculate initial state using m0 and P0:
     delta_X0_rand = mvnrnd(zeros(6,1),P0)';
-
+    w_tilde = mvnrnd(zeros(1,6), C_w_tilde, length(0:const.Dt_int:const.tf_int))';
 
     %calculate true trajectory and measurements using non-linear dynamics
     [~, ~, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom+delta_X0_rand, const);
