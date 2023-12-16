@@ -106,3 +106,15 @@ hold off
 
 Nsimruns = 10;
 calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
+
+
+Nsimruns = 50;
+% calcNEESNIS(Nsimruns,P0,w_tilde,Q,R,0.05,0.05, const)
+
+
+X0_true = [const.r0_nom_N; const.v0_nom_N];
+[xhat_k_plus_hist, P_k_plus_hist] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_sim, nom_lmks_visible, R);
+
+
+figure
+plotFilterResults(t_obs,xhat_k_plus_hist,"","")
