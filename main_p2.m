@@ -5,6 +5,7 @@
 clear
 close all
 % warning off
+rng(100)
 
 addpath('./functions/');
 addpath('./Data/');
@@ -38,7 +39,7 @@ X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
 X0 = X0_nom_N + X0_delta;
 [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(zeros(6,6,npts_int), X0, const);
 % simulate measurements
-[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+[us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 % -------------------------------------------------------------------------
