@@ -111,7 +111,7 @@ figure
 plotFilterResults(t, t_obs, deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
 
 X0_true = [const.r0_nom_N; const.v0_nom_N];
-[xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R, X_nomObs_N);
+[xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(t_obs, X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R, X_nomObs_N);
 
 %             (n_runs, t_obs, P0, C_w_tilde, Qkf, R, alpha_nees, alpha_nis, const, GAMMA)
 calcEKFNEESNIS(Nsimruns,t_obs,P0,C_w_tilde, Q, R, 0.05, 0.05, const, gamma)

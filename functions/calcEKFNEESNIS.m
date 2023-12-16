@@ -38,7 +38,7 @@ for i = 1:n_runs
 %     deltaX_true = X_simObs_N-X_nomObs_N;
     X0_guess = X0_nom;
 %     [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_guess, P0, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, deltaX_true);
-    [X_plus, P_plus, NEES, NIS] = EKF(X0_guess, P0, const, GAMMA, Qkf, R_CtoN, pos_lmks_A, pos_lmks_N, Y_sim_N, nom_lmks_visible, R, X_simObs_N);
+    [X_plus, P_plus, NEES, NIS] = EKF(t_obs, X0_guess, P0, const, GAMMA, Qkf, R_CtoN, pos_lmks_A, pos_lmks_N, Y_sim_N, nom_lmks_visible, R, X_simObs_N);
 
 
     NEES_hist(i,:) = NEES;
