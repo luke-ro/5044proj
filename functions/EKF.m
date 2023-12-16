@@ -33,64 +33,15 @@ xhat_k_plus_hist(:,1) = xhat_k_plus;
 P_k_plus_hist(:,:,1) = P_k_plus;
 %% STEP 2
 
-k = 1;
 lmk_idxs = 1:50;
 for i = 1:npts_obs - 1
     for j = 1:10
-        ode_fun = @(t,X) dynamics(t,X,const,zeros(n,npts_int));
-        [t,X_sim] = ode45(ode_fun,[0 60],xhat_k_plus,ode_options);
-    %     xhat_kplus1_minus = X_sim_N(:,1);
-        xhat_k_plus = X_sim(end,:)';
-    
-        %calcuate jacobian accoring to nominal traj
-        Atilde = dyn_jacobian(xhat_k_plus,const);
-        
-        %calcuate f using matrix expm
-        Ahat = [Atilde zeros(6,1); zeros(1,7)];
-        phim_hat = expm(Ahat*const.Dt_int);
-        Ftilde = phim_hat(1:6, 1:6);
-        Gtilde = phim_hat(1:6, 7);
-        omega = const.Dt_int * gamma;
-    
-        P_kplus1_minus = Ftilde*P_k_plus*Ftilde' + omega*Q*omega';
-        P_k_plus = P_kplus1_minus;
-        k = k+1;
+        [xhat_k_plus, P_k_plus] = EKF_dynamicPrediction(xhat_k_plus, P_k_plus, Q, gamma, const, npts_int);
     end
     xhat_kplus1_minus = xhat_k_plus;
+    P_kplus1_minus = P_k_plus;
 
-    [u_k, v_k, ~] = simMeasurements(const.Dt_int, xhat_kplus1_minus, R_CtoN(:,:,i), pos_lmks_A, const);
-    H_tilde_kplus1 = zeros(100,6);
-    for ii = 1:2:100
-        H_tilde_kplus1(ii:ii+1,:) = dyn_jacobian_H(xhat_kplus1_minus, pos_lmks_N(:,lmk_idxs((ii+1)/2),i), R_CtoN(:,:,i), const);
-    end
-    u_k = u_k(nom_lmks_visible(:,i));
-    v_k = v_k(nom_lmks_visible(:,i));
-    yhat_kplus1 = zeros(2*sum(nom_lmks_visible(:,i)),1);
-    yhat_kplus1(1:2:length(u_k)*2) = u_k;
-    yhat_kplus1(2:2:length(v_k)*2) = v_k;
-
-    true_mask = zeros(2*sum(nom_lmks_visible(:,i)),1);
-    true_mask(1:2:100) = nom_lmks_visible(:,i);
-    true_mask(2:2:100) = nom_lmks_visible(:,i);
-    true_mask = logical(true_mask);
-    e_tilde_ykplus1 = y_true(true_mask,i) - yhat_kplus1;
-
-    H_tilde_kplus1 = H_tilde_kplus1(true_mask,:);
-    R_single = R;
-    R_mat = R;
-    for jj = 1:size(H_tilde_kplus1,1)/2-1
-        R_mat = blkdiag(R_mat, R_single);
-    end
-
-    invTerm = (H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)\eye(size((H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)));
-    K_tilde_kplus1 = P_kplus1_minus * H_tilde_kplus1' * invTerm;
-
-    xhat_kplus1_plus = xhat_kplus1_minus + K_tilde_kplus1*e_tilde_ykplus1;
-    P_kplus1_plus = (eye(n) - K_tilde_kplus1*H_tilde_kplus1)*P_kplus1_minus;
-    
-    xhat_k_plus = xhat_kplus1_plus;
-    P_k_plus = P_kplus1_plus;
-
+    [xhat_k_plus, P_k_plus] = EKF_measurementUpdate(xhat_kplus1_minus, P_kplus1_minus, R_CtoN, pos_lmks_A, pos_lmks_N, const, nom_lmks_visible, i, y_true, R, n);
     xhat_k_plus_hist(:,i+1) = xhat_k_plus;
     P_k_plus_hist(:,:,i+1) = P_k_plus;
 end

@@ -113,8 +113,14 @@ Nsimruns = 50;
 
 
 X0_true = [const.r0_nom_N; const.v0_nom_N];
-[xhat_k_plus_hist, P_k_plus_hist] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_sim, nom_lmks_visible, R);
+[xhat_k_plus_hist, P_k_plus_hist] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R);
 
 
 figure
-plotFilterResults(t_obs,xhat_k_plus_hist,"","")
+plotStates(t_obs,xhat_k_plus_hist,"","")
+
+for i = 1:433
+    if any(diag([P_k_plus_hist(:,:,i)]) < 0)
+        fprintf("Negative diagonal elements at k = %d \n", i)
+    end
+end
