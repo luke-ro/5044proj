@@ -48,14 +48,11 @@ for i = 2:npts_obs-1
     delta_x_minus = delta_x_plus(:,i);
     P_minus = P_plus(:,:,i);
     invPkp1 = inv(P_plus(:,:,i));
-    NEES(i) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
     
-%     invP_minus = inv(P_minus);
-%     big_invP_minus = invP_minus;
-%     for k = 1:length(innov_plus)/n-1
-%         big_invP_minus = blkdiag(big_invP_minus, invP_minus);
-%     end
-    NIS(i) = innov_plus'*S_k*innov_plus; 
+    if(deltaX_true)
+        NEES(i) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
+        NIS(i) = innov_plus'*S_k*innov_plus; 
+    end
 end
 
 
