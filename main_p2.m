@@ -79,52 +79,54 @@ OMEGA = const.Dt_int*gamma;
 % end
 
 delta_X0 = deltaX_sim_N(:,1);
+% P0 = blkdiag(0.01*eye(3), 1e-12*eye(3));
 P0 = blkdiag(0.01*eye(3), 1e-6*eye(3));
 R = diag([const.sig_uv^2, const.sig_uv^2]);
+% Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
+%                      0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
+%                      0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
+%                      const.Dt_int^2/2 0 0 const.Dt_int 0 0;
+%                      0 const.Dt_int^2/2 0 0 100*const.Dt_int 0;
+%                      0 0 const.Dt_int^2/2 0 0 100*const.Dt_int];
 Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
                      0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
                      0 0 const.Dt_int^3/3 0 0 const.Dt_int^2/2;
                      const.Dt_int^2/2 0 0 const.Dt_int 0 0;
                      0 const.Dt_int^2/2 0 0 const.Dt_int 0;
                      0 0 const.Dt_int^2/2 0 0 const.Dt_int];
-
+                 
 % [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
 [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, deltaX_sim_N);
 
 figure
 plotStates(t_obs,delta_x_plus,"","")
 
-figure
-hold on
-plot(t, deltaX_sim_N(1,:))
-plot(t_obs,delta_x_plus(1,:))
-plot(t_obs,deltaX_sim_N(1,1:10:end)+2*sqrt(squeeze(P_plus(1,1,:))'))
-plot(t_obs,deltaX_sim_N(1,1:10:end)-2*sqrt(squeeze(P_plus(1,1,:))'))
-legend("True $\delta x$","LKF $\delta x$", "$+2\sigma$","$+2\sigma$","Interpreter", "Latex")
-% ylim([-20,20])
-hold off
-
 Nsimruns = 10;
-calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
-title = "LKF Perturbation State vs Time";
-figure
-plotFilterResults(t, t_obs, deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
+% calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
+% title = "LKF Perturbation State vs Time";
+% figure
+% plotFilterResults(t, t_obs, deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
 
 X0_true = [const.r0_nom_N; const.v0_nom_N];
-[xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(t_obs, X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R, X_nomObs_N);
+[xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(t_obs, X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_sim, nom_lmks_visible, R, X_simObs_N);
 
 %             (n_runs, t_obs, P0, C_w_tilde, Qkf, R, alpha_nees, alpha_nis, const, GAMMA)
-calcEKFNEESNIS(Nsimruns,t_obs,P0,C_w_tilde, Q, R, 0.05, 0.05, const, gamma)
+% calcEKFNEESNIS(Nsimruns,t_obs,P0,C_w_tilde, Q, R, 0.05, 0.05, const, gamma)
 
 
-figure
-plotStates(t_obs,xhat_k_plus_hist,"EKF Results","")
+% figure
+% plotStates(t_obs,xhat_k_plus_hist,"EKF Results","")
+% 
+% figure
+% plotFilterResults(t, t_obs, X_sim_N, xhat_k_plus_hist, P_k_plus_hist, "EKF Results","")
+% 
+% for i = 1:433
+%     if any(diag([P_k_plus_hist(:,:,i)]) < 0)
+%         fprintf("Negative diagonal elements at k = %d \n", i)
+%     end
+% end
 
-figure
-plotFilterResults(t, t_obs, X_nom_N, xhat_k_plus_hist, P_k_plus_hist, "EKF Results","")
+[Y,lmks_vis] = parseYtable(y_table);
+dataEKF(t_obs, Y, lmks_vis, P0, Q, gamma, const, R_CtoN, pos_lmks_A, pos_lmks_N)
+dataLKF(t_obs, Y, lmks_vis, uv_stacked_nom, Q, P0, bigF, bigC, OMEGA, X_nomObs_N, const)
 
-for i = 1:433
-    if any(diag([P_k_plus_hist(:,:,i)]) < 0)
-        fprintf("Negative diagonal elements at k = %d \n", i)
-    end
-end

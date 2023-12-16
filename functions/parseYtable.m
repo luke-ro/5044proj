@@ -15,5 +15,6 @@ for i = 1:length(t_obs)
     Y(2*(idxs-1)+1,i) = mini_tab(:,3);
     Y(2*(idxs-1)+2,i) = mini_tab(:,4);
 end
+lmks_vis = logical(lmks_vis);
 end
 
