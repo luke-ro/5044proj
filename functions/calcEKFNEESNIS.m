@@ -12,8 +12,8 @@ X0_nom = [const.r0_nom_N;const.v0_nom_N];
 Y_nom_N = stackUsVs(u_nom,v_nom);
 
 
-NEES_hist = zeros(n_runs, length(t_obs)-2);
-NIS_hist = zeros(n_runs,length(t_obs)-2);
+NEES_hist = zeros(n_runs, length(t_obs)-1);
+NIS_hist = zeros(n_runs,length(t_obs)-1);
 
 for i = 1:n_runs
     % calculate initial state using m0 and P0:

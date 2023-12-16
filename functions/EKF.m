@@ -12,8 +12,9 @@ function [xhat_k_plus_hist, P_k_plus_hist, NEES, NIS] = EKF(t_obs, xhat0_plus, P
 %   R:
 
 n = length(xhat0_plus);
-npts_obs = 432;
-npts_int = 4321;
+npts_obs = length(t_obs);
+% npts_int = 4321;
+steps = 1; % how many dynamic prediction steps we do at a time (for the ZOH noise inputs)
 
 
 %% STEP 1
@@ -23,20 +24,22 @@ npts_int = 4321;
 
 xhat_k_plus = xhat0_plus;
 P_k_plus = Phat0_plus;
-ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
+% ode_options = odeset('RelTol',1e-12, 'AbsTol',1e-12);
 
 % preallocate vectors
-xhat_k_plus_hist = zeros(n,npts_obs+1);
-P_k_plus_hist = zeros(n,n,npts_obs+1);
+xhat_k_plus_hist = zeros(n,npts_obs);
+P_k_plus_hist = zeros(n,n,npts_obs);
+NEES = zeros(1,length(t_obs)-1);
+NIS = zeros(1,length(t_obs)-1);
 
 xhat_k_plus_hist(:,1) = xhat_k_plus;
 P_k_plus_hist(:,:,1) = P_k_plus;
 %% STEP 2
 
-lmk_idxs = 1:50;
-for i = 2:npts_obs - 1
+% lmk_idxs = 1:50;
+for i = 2:npts_obs
     for j = 1:10
-        [xhat_k_plus, P_k_plus] = EKF_dynamicPrediction(xhat_k_plus, P_k_plus, Q, gamma, const, npts_int);
+        [xhat_k_plus, P_k_plus] = EKF_dynamicPrediction(xhat_k_plus, P_k_plus, Q, gamma, const, steps);
     end
     xhat_kplus1_minus = xhat_k_plus;
     P_kplus1_minus = P_k_plus;
@@ -46,8 +49,8 @@ for i = 2:npts_obs - 1
     P_k_plus_hist(:,:,i) = P_k_plus;
 
     invPkp1 = inv(P_k_plus);
-    NEES(i) = (X_true(:,i) - xhat_k_plus)'*invPkp1*(X_true(:,i) - xhat_k_plus);
-    NIS(i) = innov_plus'*S_k*innov_plus; 
+    NEES(i-1) = (X_true(:,i) - xhat_k_plus)'*invPkp1*(X_true(:,i) - xhat_k_plus);
+    NIS(i-1) = innov_plus'*S_k*innov_plus; 
 
 end
 
