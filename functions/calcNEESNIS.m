@@ -1,15 +1,15 @@
-function [outputArg1,outputArg2] = calcNEESNIS(n_runs, P0, w_tilde, Qkf, R, alpha_nees, alpha_nis, const)
+function [outputArg1,outputArg2] = calcNEESNIS(n_runs, t_obs, P0, w_tilde, Qkf, R, OMEGA, alpha_nees, alpha_nis, const)
 %CALCNEES Summary of this function goes here
 %   Detailed explanation goes here
 
-load("P1_vars.mat","bigF","bigC")
+load("P1_vars.mat","bigF","bigC","u_nom","v_nom","nom_lmks_visible","X_nomObs_N")
 load('data/orbitdetermination-finalproj_data_2023_11_14.mat',"R_CtoN","pos_lmks_A")
 
 X0_nom = [const.r0_nom_N;const.v0_nom_N];
 %calculate nominal traj and measurements
-[X_nom_N, t, X_nomObs_N, t_obs]= simNLdynamics(w_tilde, X0_nom, const);
-[us, vs, nom_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
-Y_nom_N = stackUsVs(us,vs);
+% [X_nom_N, t, X_nomObs_N, t_obs]= simNLdynamics(w_tilde, X0_nom, const);
+% [us, vs, nom_lmks_visible] = simMeasurements(t_obs, X_nomObs_N, R_CtoN, pos_lmks_A, const);
+Y_nom_N = stackUsVs(u_nom,v_nom);
 
 
 NEES_hist = zeros(n_runs, length(t_obs)-1);
@@ -21,7 +21,7 @@ for i = 1:n_runs
 
 
     %calculate true trajectory and measurements using non-linear dynamics
-    [X_sim_N, ~, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom+delta_X0_rand, const);
+    [~, ~, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom+delta_X0_rand, const);
 
     [us_sim, vs_sim, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 %     uv_stacked_sim = stackUsVs(us,vs);
@@ -35,7 +35,7 @@ for i = 1:n_runs
     % P_plus: (n x n x time) matrix of covariance matrix after meas update
     % y_innov: (p x n x time) matrix of dynamics predicted y - meas y
     
-    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0, Y_delta, sim_lmks_visible, bigF, Qkf, bigC, R, X_nomObs_N);
+    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, X_nomObs_N);
 
     NEES_hist(i,:) = NEES;
     NIS_hist(i,:) = NIS;

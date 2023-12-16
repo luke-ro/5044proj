@@ -108,4 +108,4 @@ hold off
 
 
 Nsimruns = 50;
-% calcNEESNIS(Nsimruns,P0,w_tilde,Q,R,0.05,0.05, const)
+calcNEESNIS(Nsimruns,t_obs, P0,w_tilde,Q,R,OMEGA,0.05,0.05, const)
