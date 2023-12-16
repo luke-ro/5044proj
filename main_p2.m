@@ -94,25 +94,15 @@ Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
 figure
 plotStates(t_obs,delta_x_plus,"","")
 
-figure
-hold on
-plot(t, deltaX_sim_N(1,:))
-plot(t_obs,delta_x_plus(1,:))
-plot(t_obs,deltaX_sim_N(1,1:10:end)+2*sqrt(squeeze(P_plus(1,1,:))'))
-plot(t_obs,deltaX_sim_N(1,1:10:end)-2*sqrt(squeeze(P_plus(1,1,:))'))
-legend("True $\delta x$","LKF $\delta x$", "$+2\sigma$","$+2\sigma$","Interpreter", "Latex")
-% ylim([-20,20])
-hold off
-
-Nsimruns = 10;
-calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
-title = "LKF Perturbation State vs Time";
-figure
-plotFilterResults(t, t_obs, deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
+% Nsimruns = 10;
+% calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
+% title = "LKF Perturbation State vs Time";
+% figure
+% plotFilterResults(t, t_obs, deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
 
 X0_true = [const.r0_nom_N; const.v0_nom_N];
-[xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R, X_nomObs_N);
-
+% [xhat_k_plus_hist, P_k_plus_hist, NEES_EKF, NIS_EKF] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R, X_nomObs_N);
+[xhat_k_plus_hist, P_k_plus_hist] = EKF(X0_true, P0, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, uv_stacked_nom, nom_lmks_visible, R)
 
 figure
 plotStates(t_obs,xhat_k_plus_hist,"EKF Results","")
