@@ -23,7 +23,7 @@ X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
 % simulate with process noise ---------------------------------------------
 % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
-C_w_tilde = diag([zeros(1,3), (const.sig_w^2/100)*ones(1,3)]);
+C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
 % C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
 w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
 [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
@@ -104,8 +104,5 @@ legend("True $\delta x$","LKF $\delta x$", "$+2\sigma$","$+2\sigma$","Interprete
 % ylim([-20,20])
 hold off
 
-
-
-
 Nsimruns = 10;
-calcNEESNIS(Nsimruns,t_obs, P0,w_tilde,Q,R,OMEGA,0.05,0.05, const)
+calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
