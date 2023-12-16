@@ -3,14 +3,8 @@ function [us, vs, lmks_visible] = simMeasurements(t, X_sim_N, NC, pos_lmks_A, co
 %   Detailed explanation goes here
 
 num_LMKs = 50;
-% n = 6;
-% npts = length(t);
 
-% NA = zeros(3,3,433);
-X_sim_A = zeros(6,433);
-% AN = zeros(3,3,433);
-% pos_lmks_C = zeros(3,50,433);
-% pos_lmks_N = zeros(3,50,433);
+X_sim_A = zeros(6,length(t));
 
 lmks_in_FOV = zeros(num_LMKs,length(t));
 lmks_in_front = zeros(num_LMKs,length(t));
