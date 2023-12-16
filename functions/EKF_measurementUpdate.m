@@ -35,7 +35,11 @@ function [xhat_k_plus,P_k_plus, innov_plus, S_k] = EKF_measurementUpdate(t, xhat
     
     xhat_k_plus = xhat_kplus1_plus;
     P_k_plus = P_kplus1_plus;
-    P_k_plus = (P_k_plus + P_k_plus')/2;
+%     P_k_plus = (P_k_plus + P_k_plus')/2;
+    [~,p] = chol(P_k_plus);
+    if p ~= 0
+      P_k_plus = neasestPSD(P_k_plus);
+    end
 
     innov_plus = e_tilde_ykplus1;
     S_k = invTerm;
