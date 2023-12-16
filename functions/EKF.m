@@ -1,4 +1,4 @@
-function [xhat_k_plus_hist, P_k_plus_hist] = EKF(xhat0_plus, Phat0_plus, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, y_true, nom_lmks_visible, R)
+function [xhat_k_plus_hist, P_k_plus_hist, NEES, NIS] = EKF(xhat0_plus, Phat0_plus, const, gamma, Q, R_CtoN, pos_lmks_A, pos_lmks_N, y_true, nom_lmks_visible, R, X_true)
 %EKF Extended Kalman Filter
 %   xhat0_plus : initial total state
 %   Phat0_plus : initial covariance 
@@ -34,16 +34,21 @@ P_k_plus_hist(:,:,1) = P_k_plus;
 %% STEP 2
 
 lmk_idxs = 1:50;
-for i = 1:npts_obs - 1
+for i = 2:npts_obs - 1
     for j = 1:10
         [xhat_k_plus, P_k_plus] = EKF_dynamicPrediction(xhat_k_plus, P_k_plus, Q, gamma, const, npts_int);
     end
     xhat_kplus1_minus = xhat_k_plus;
     P_kplus1_minus = P_k_plus;
 
-    [xhat_k_plus, P_k_plus] = EKF_measurementUpdate(xhat_kplus1_minus, P_kplus1_minus, R_CtoN, pos_lmks_A, pos_lmks_N, const, nom_lmks_visible, i, y_true, R, n);
-    xhat_k_plus_hist(:,i+1) = xhat_k_plus;
-    P_k_plus_hist(:,:,i+1) = P_k_plus;
+    [xhat_k_plus, P_k_plus, innov_plus, S_k] = EKF_measurementUpdate(xhat_kplus1_minus, P_kplus1_minus, R_CtoN, pos_lmks_A, pos_lmks_N, const, nom_lmks_visible, i, y_true, R, n);
+    xhat_k_plus_hist(:,i) = xhat_k_plus;
+    P_k_plus_hist(:,:,i) = P_k_plus;
+
+    invPkp1 = inv(P_k_plus);
+    NEES(i) = (X_true(:,i) - xhat_k_plus)'*invPkp1*(X_true(:,i) - xhat_k_plus);
+    NIS(i) = innov_plus'*S_k*innov_plus; 
+
 end
 
 % %calculate H from sim data

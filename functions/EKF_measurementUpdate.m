@@ -1,4 +1,4 @@
-function [xhat_k_plus,P_k_plus] = EKF_measurementUpdate(xhat_kplus1_minus, P_kplus1_minus, R_CtoN, pos_lmks_A, pos_lmks_N, const, nom_lmks_visible, i, y_true, R, n)
+function [xhat_k_plus,P_k_plus, innov_plus, S_k] = EKF_measurementUpdate(xhat_kplus1_minus, P_kplus1_minus, R_CtoN, pos_lmks_A, pos_lmks_N, const, nom_lmks_visible, i, y_true, R, n)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -35,5 +35,8 @@ function [xhat_k_plus,P_k_plus] = EKF_measurementUpdate(xhat_kplus1_minus, P_kpl
     
     xhat_k_plus = xhat_kplus1_plus;
     P_k_plus = P_kplus1_plus;
+
+    innov_plus = e_tilde_ykplus1;
+    S_k = H_tilde_kplus1*P_kplus1_plus*H_tilde_kplus1' + R_mat;
 
 end
