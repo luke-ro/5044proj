@@ -34,8 +34,9 @@ for i = 1:n_runs
     % P_yy:  (p x p X time) matrix of Pyy=0.5*H_kp1*P_minus_kp1*H_kp1'
     % P_plus: (n x n x time) matrix of covariance matrix after meas update
     % y_innov: (p x n x time) matrix of dynamics predicted y - meas y
+    deltaX_true = X_simObs_N-X_nomObs_N;
     
-    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, X_nomObs_N);
+    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, deltaX_true);
 
     NEES_hist(i,:) = NEES;
     NIS_hist(i,:) = NIS;

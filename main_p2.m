@@ -89,7 +89,7 @@ Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
                      0 0 const.Dt_int^2/2 0 0 const.Dt_int];
 
 % [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
-[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, X_nomObs_N);
+[delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, deltaX_sim_N);
 
 figure
 plotStates(t_obs,delta_x_plus,"","")
@@ -107,5 +107,5 @@ hold off
 
 
 
-Nsimruns = 50;
+Nsimruns = 10;
 calcNEESNIS(Nsimruns,t_obs, P0,w_tilde,Q,R,OMEGA,0.05,0.05, const)

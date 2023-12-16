@@ -1,4 +1,4 @@
-function [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_x0, P0, delta_y, lmks_in_view_sim, F, Q, OMEGA, H_all, R, x_nomObs_N)
+function [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_x0, P0, delta_y, lmks_in_view_sim, F, Q, OMEGA, H_all, R, deltaX_true)
 %LKF Linearized Kalman Filter
 %   delta_y: cell array of stacked us and vs from simulated trajectorye
 %   lmks_in_view: which landmarks are in the measurenemts delta_y
@@ -48,7 +48,7 @@ for i = 2:npts_obs-1
     delta_x_minus = delta_x_plus(:,i);
     P_minus = P_plus(:,:,i);
     invPkp1 = inv(P_plus(:,:,i));
-    NEES(i) = (x_nomObs_N(:,i) - delta_x_plus(:,i))'*invPkp1*(x_nomObs_N(:,i) - delta_x_plus(:,i));
+    NEES(i) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
     
 %     invP_minus = inv(P_minus);
 %     big_invP_minus = invP_minus;
