@@ -34,9 +34,9 @@ P_plus(:,:,1) = P0;
 k = 1;
 delta_x_minus = delta_x0;
 P_minus = P0;
-NEES = zeros(npts_obs-2);
-NIS = zeros(npts_obs-2);
-for i = 2:npts_obs-1
+NEES = zeros(1,npts_obs-1);
+NIS = zeros(1,npts_obs-1);
+for i = 2:npts_obs
     for j = 1:10
         [delta_x_minus, P_minus] = LKF_dynamicPrediction(delta_x_minus, P_minus, F(:,:,k), Q, OMEGA);
         k = k+1;
@@ -52,8 +52,8 @@ for i = 2:npts_obs-1
     invPkp1 = inv(P_plus(:,:,i));
     
     if(deltaX_true)
-        NEES(i) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
-        NIS(i) = innov_plus'*S_k*innov_plus; 
+        NEES(i-1) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
+        NIS(i-1) = innov_plus'*S_k*innov_plus; 
     end
 end
 

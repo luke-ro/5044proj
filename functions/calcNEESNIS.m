@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = calcNEESNIS(n_runs, t_obs, P0, C_w_tilde, Qkf, R, OMEGA, alpha_nees, alpha_nis, const)
+function [outputArg1,outputArg2] = calcNEESNIS(n_runs, t_obs, P0_LKF, P0, C_w_tilde, Qkf, R, OMEGA, alpha_nees, alpha_nis, const)
 %CALCNEES Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -36,7 +36,7 @@ for i = 1:n_runs
     % y_innov: (p x n x time) matrix of dynamics predicted y - meas y
     deltaX_true = X_simObs_N-X_nomObs_N;
     
-    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, deltaX_true);
+    [delta_x_plus, P_plus, NEES, NIS]= LKF(delta_X0_rand, P0_LKF, Y_delta, nom_lmks_visible, bigF, Qkf, OMEGA, bigC, R, deltaX_true);
 
     NEES_hist(i,:) = NEES;
     NIS_hist(i,:) = NIS;
@@ -51,13 +51,13 @@ r2x = chi2inv(1-alpha_nees/2, Nnx ) ./ n_runs;
 
 figure()
 % title("NEES Estimation")
-title('NEES Estimation Results','FontSize',14)
+% title('LKF NEES Estimation Results','FontSize',14)
 plot(epsNEESbar,'ro','MarkerSize',6,'LineWidth',2),hold on
 plot(r1x*ones(size(epsNEESbar)),'r--','LineWidth',2)
 plot(r2x*ones(size(epsNEESbar)),'r--','LineWidth',2)
 ylabel('NEES statistic, $\bar{\epsilon}_x$','Interpreter','latex', 'FontSize',14)
 xlabel('time step, k','FontSize',14)
-% title('NEES Estimation Results','FontSize',14)
+title('LKF - NEES Estimation Results','FontSize',14)
 legend('NEES @ time k', 'r_1 bound', 'r_2 bound'),grid on
 % saveas(f,'NEESResults.png','png')
 
@@ -65,7 +65,7 @@ epsNISbar = mean(NIS,1);
 
 figure
 plot(epsNISbar,'bo','MarkerSize',6,'LineWidth',2),hold on
-% title("NIS Estimation")
+title("LKF NIS Estimation")
 for i=1:length(bigC)
     Nny = n_runs*size(bigC{i},1);
     %%compute intervals:
@@ -78,7 +78,7 @@ for i=1:length(bigC)
 end
 ylabel('NIS statistic, $\bar{\epsilon}_y$','Interpreter','latex','FontSize',14)
 xlabel('time step, k','FontSize',14)
-title('NIS Estimation Results','FontSize',14)
+title('LKF - NIS Estimation Results','FontSize',14)
 legend('NIS @ time k', 'r_1 bound', 'r_2 bound'),grid on
 % saveas(f,'NISResults.png','png')
 end
