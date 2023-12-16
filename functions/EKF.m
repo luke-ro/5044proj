@@ -49,8 +49,11 @@ for i = 2:npts_obs
     P_k_plus_hist(:,:,i) = P_k_plus;
 
     invPkp1 = inv(P_k_plus);
-    NEES(i-1) = (X_true(:,i) - xhat_k_plus)'*invPkp1*(X_true(:,i) - xhat_k_plus);
-    NIS(i-1) = innov_plus'*S_k*innov_plus; 
+    
+    if(length(X_true)>100)
+        NEES(i-1) = (X_true(:,i) - xhat_k_plus)'*invPkp1*(X_true(:,i) - xhat_k_plus);
+        NIS(i-1) = innov_plus'*S_k*innov_plus; 
+    end
 
 end
 
