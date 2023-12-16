@@ -20,6 +20,7 @@ npts_obs = length(0:const.Dt_obs:const.tf_obs);
 %% Simulate full nonlinear dynamics with process noise
 X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
+<<<<<<< Updated upstream
 % simulate with process noise ---------------------------------------------
 % % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
 % C_w_tilde = diag([zeros(1,3), (const.sig_w^2/100)*ones(1,3)]);
@@ -32,6 +33,19 @@ X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 % uv_stacked_sim = stackUsVs(us,vs);
 % uv_stacked_nom = stackUsVs(u_nom,v_nom);
 % -------------------------------------------------------------------------
+=======
+% % simulate with process noise ---------------------------------------------
+% % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
+C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
+% w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
+% [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
+% 
+% % simulate measurements
+% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
+% uv_stacked_sim = stackUsVs(us,vs);
+% uv_stacked_nom = stackUsVs(u_nom,v_nom);
+% % -------------------------------------------------------------------------
+>>>>>>> Stashed changes
 
 % test with no process noise ----------------------------------------------
 X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
@@ -78,7 +92,8 @@ OMEGA = const.Dt_int*gamma;
 % end
 
 delta_X0 = deltaX_sim_N(:,1);
-P0 = blkdiag(0.01*eye(3), 1e-6*eye(3));
+% P0 = blkdiag(0.01*eye(3), 1e-6*eye(3));
+P0 = diag([0.001, 0.01, 0.01, 1e-9, 1e-6, 1e-6]);
 R = diag([const.sig_uv^2, const.sig_uv^2]);
 Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
                      0 const.Dt_int^3/3 0 0 const.Dt_int^2/2 0;
@@ -88,12 +103,18 @@ Q = const.sig_w^2 * [const.Dt_int^3/3 0 0 const.Dt_int^2/2 0 0;
                      0 0 const.Dt_int^2/2 0 0 const.Dt_int];
 
 % [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, sim_lmks_visible, bigF, Q, bigC, R, X_nomObs_N);
+<<<<<<< Updated upstream
 [delta_x_plus, P_plus, NEES, NIS] = LKF(delta_X0, P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, X_nomObs_N);
+=======
+[delta_x_plus, P_plus, NEES, NIS] = LKF(zeros(6,1), P0, y_delta_sim, nom_lmks_visible, bigF, Q, OMEGA, bigC, R, deltaX_sim_N);
+>>>>>>> Stashed changes
 
 figure
 plotStates(t_obs,delta_x_plus,"","")
 
+title = "LKF Perturbation State Estimate vs Time";
 figure
+<<<<<<< Updated upstream
 hold on
 plot(t, deltaX_sim_N(1,:))
 plot(t_obs,delta_x_plus(1,:))
@@ -156,3 +177,10 @@ title('NIS Estimation Results','FontSize',14)
 legend('NIS @ time k', 'r_1 bound', 'r_2 bound'),grid on
 % saveas(f,'NISResults.png','png')
 
+=======
+plotFilterResults(t,t_obs,deltaX_sim_N, delta_x_plus, P_plus, title, "$$\delta$$")
+
+% Monte Carlo
+Nsimruns = 10;
+calcNEESNIS(Nsimruns,t_obs, P0,C_w_tilde,Q,R,OMEGA,0.05,0.05, const)
+>>>>>>> Stashed changes
