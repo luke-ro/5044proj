@@ -38,6 +38,6 @@ function [xhat_k_plus,P_k_plus, innov_plus, S_k] = EKF_measurementUpdate(t, xhat
     P_k_plus = (P_k_plus + P_k_plus')/2;
 
     innov_plus = e_tilde_ykplus1;
-    S_k = H_tilde_kplus1*P_kplus1_plus*H_tilde_kplus1' + R_mat;
+    S_k = invTerm;
 
 end
