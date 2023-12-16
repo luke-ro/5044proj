@@ -22,27 +22,27 @@ npts_obs = length(0:const.Dt_obs:const.tf_obs);
 X0_nom_N = [const.r0_nom_N; const.v0_nom_N];
 
 % simulate with process noise ---------------------------------------------
-% % C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
-% C_w_tilde = diag([zeros(1,3), (const.sig_w^2/100)*ones(1,3)]);
-% % C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
-% w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
-% [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
+% C_w_tilde = diag([zeros(1,3), (const.sig_w^2)*ones(1,3)]);
+C_w_tilde = diag([zeros(1,3), (const.sig_w^2/100)*ones(1,3)]);
+% C_w_tilde = diag([(const.sig_w^2)*ones(1,3), zeros(1,3)]);
+w_tilde = mvnrnd(zeros(1,n), C_w_tilde, npts_int)';
+[X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(w_tilde, X0_nom_N, const);
 
-% simulate measurements
-% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
-% uv_stacked_sim = stackUsVs(us,vs);
-% uv_stacked_nom = stackUsVs(u_nom,v_nom);
-% -------------------------------------------------------------------------
-
-% test with no process noise ----------------------------------------------
-X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
-X0 = X0_nom_N + X0_delta;
-[X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(zeros(6,6,npts_int), X0, const);
 % simulate measurements
 [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
 uv_stacked_sim = stackUsVs(us,vs);
 uv_stacked_nom = stackUsVs(u_nom,v_nom);
 % -------------------------------------------------------------------------
+
+% % test with no process noise ----------------------------------------------
+% X0_delta = [1e-5 1e-5 1e-5 1e-7 1e-7 1e-7]';
+% X0 = X0_nom_N + X0_delta;
+% [X_sim_N, t, X_simObs_N, t_obs] = simNLdynamics(zeros(6,6,npts_int), X0, const);
+% % simulate measurements
+% [us, vs, sim_lmks_visible] = simMeasurements(t_obs, X_simObs_N, R_CtoN, pos_lmks_A, const);
+% uv_stacked_sim = stackUsVs(us,vs);
+% uv_stacked_nom = stackUsVs(u_nom,v_nom);
+% % -------------------------------------------------------------------------
 
 deltaX_sim_N = X_sim_N - X_nom_N;
 y_delta_sim = uv_stacked_sim - uv_stacked_nom;
@@ -98,8 +98,8 @@ figure
 hold on
 plot(t, deltaX_sim_N(1,:))
 plot(t_obs,delta_x_plus(1,:))
-plot(t_obs,2*sqrt(squeeze(P_plus(1,1,:))))
-plot(t_obs,-2*sqrt(squeeze(P_plus(1,1,:))))
+plot(t_obs,deltaX_sim_N(1,1:10:end)+2*sqrt(squeeze(P_plus(1,1,:))'))
+plot(t_obs,deltaX_sim_N(1,1:10:end)-2*sqrt(squeeze(P_plus(1,1,:))'))
 legend("True $\delta x$","LKF $\delta x$", "$+2\sigma$","$+2\sigma$","Interpreter", "Latex")
 % ylim([-20,20])
 hold off
