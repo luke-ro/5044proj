@@ -70,7 +70,7 @@ if length(X_sim) > 1
 end
 ylabel(strcat(modifier,'$v_{\hat{Z}}$ [km/s]'), 'Interpreter', 'latex')
 xlabel('time [hours]')
-legend("LKF $\delta x$", "$+2\sigma$","$+2\sigma$", "True $\delta x$","Interpreter", "Latex", "Location", "best")
+legend("$\delta x$", "$+2\sigma$","$+2\sigma$", "True $\delta x$","Interpreter", "Latex", "Location", "best")
 xlim([t_obs(2), t_obs(end)])
 end
 
