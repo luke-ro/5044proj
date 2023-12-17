@@ -46,15 +46,18 @@ for i = 2:npts_obs
     dy(1:2:100) = lmks_in_view_sim(:,i);
     dy(2:2:100) = lmks_in_view_sim(:,i);
     dy_vis = delta_y(dy==1,i);
-    [delta_x_plus(:,i), P_plus(:,:,i), innov_plus, S_k] = LKF_measurementUpdate(delta_x_minus, P_minus, dy_vis, H{i}, R);
-    delta_x_minus = delta_x_plus(:,i);
-    P_minus = P_plus(:,:,i);
-    invPkp1 = inv(P_plus(:,:,i));
-    
-    if(deltaX_true)
-        NEES(i-1) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
-        NIS(i-1) = innov_plus'*S_k*innov_plus; 
+    if length(dy_vis) ~= 0
+        [delta_x_plus(:,i), P_plus(:,:,i), innov_plus, S_k] = LKF_measurementUpdate(delta_x_minus, P_minus, dy_vis, H{i}, R);
+        delta_x_minus = delta_x_plus(:,i);
+        P_minus = P_plus(:,:,i);
+        invPkp1 = inv(P_plus(:,:,i));
+        
+        if(deltaX_true)
+            NEES(i-1) = (deltaX_true(:,i) - delta_x_plus(:,i))'*invPkp1*(deltaX_true(:,i) - delta_x_plus(:,i));
+            NIS(i-1) = innov_plus'*S_k*innov_plus; 
+        end
     end
+
 end
 
 

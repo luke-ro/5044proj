@@ -26,22 +26,28 @@ function [xhat_k_plus,P_k_plus, innov_plus, S_k] = EKF_measurementUpdate(t, xhat
     for jj = 1:size(H_tilde_kplus1,1)/2-1
         R_mat = blkdiag(R_mat, R_single);
     end
-
-    invTerm = (H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)\eye(size((H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)));
-    K_tilde_kplus1 = P_kplus1_minus * H_tilde_kplus1' * invTerm;
-
-    xhat_kplus1_plus = xhat_kplus1_minus + K_tilde_kplus1*e_tilde_ykplus1;
-    P_kplus1_plus = (eye(n) - K_tilde_kplus1*H_tilde_kplus1)*P_kplus1_minus;
     
-    xhat_k_plus = xhat_kplus1_plus;
-    P_k_plus = P_kplus1_plus;
-    P_k_plus = (P_k_plus + P_k_plus')/2;
-%     [~,p] = chol(P_k_plus);
-%     if p ~= 0
-%       P_k_plus = nearestPSD(P_k_plus, 'eig');
-%     end
-
-    innov_plus = e_tilde_ykplus1;
-    S_k = invTerm;
-
+    if length(u_k) ~= 0
+        invTerm = (H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)\eye(size((H_tilde_kplus1 * P_kplus1_minus * H_tilde_kplus1' + R_mat)));
+        K_tilde_kplus1 = P_kplus1_minus * H_tilde_kplus1' * invTerm;
+    
+        xhat_kplus1_plus = xhat_kplus1_minus + K_tilde_kplus1*e_tilde_ykplus1;
+        P_kplus1_plus = (eye(n) - K_tilde_kplus1*H_tilde_kplus1)*P_kplus1_minus;
+        
+        xhat_k_plus = xhat_kplus1_plus;
+        P_k_plus = P_kplus1_plus;
+        P_k_plus = (P_k_plus + P_k_plus')/2;
+    %     [~,p] = chol(P_k_plus);
+    %     if p ~= 0
+    %       P_k_plus = nearestPSD(P_k_plus, 'eig');
+    %     end
+    
+        innov_plus = e_tilde_ykplus1;
+        S_k = invTerm;
+    else
+        P_k_plus = P_kplus1_minus;
+        xhat_k_plus = xhat_kplus1_minus;
+        innov_plus = zeros(4,1);
+        S_k = 0;
+    end
 end
