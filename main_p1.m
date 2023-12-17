@@ -25,7 +25,7 @@ const.v0 = 512; % [pixels]
 const.uv_min = 0; % [pixels]
 const.uv_max = 1024; % [pixels]
 const.sig_uv = 0.25; % [pixels]
-const.Dt_obs = 600; % [seconds]
+const.Dt_obs = 1200; % [seconds]
 const.tf_obs = 259200; % [seconds]
 const.Dt_int = 60; % [seconds]
 const.tf_int = 432000; % [seconds]
@@ -53,8 +53,8 @@ w_tilde = zeros(6,length(0:const.Dt_int:const.tf_int));
 
 [X_nom_N, t] = simNLdynamics(w_tilde, X0_nom_N, const);
 
-X_nomObs_N = X_nom_N(:,1:10:length(t));
-t_obs = t(1:10:length(t));
+X_nomObs_N = X_nom_N(:,1:20:length(t));
+t_obs = t(1:20:length(t));
 
 % plot inertial orbit
 title = "True Trajectory in Inertial Frame";
@@ -65,13 +65,13 @@ title = "States vs. Time, Full Nonlinear Dynamics Simulation";
 plotStates(t,X_nom_N,title,"")
 
 % DCMs
-NC = R_CtoN;
-NA = zeros(3,3,433);
-X_nomObs_A = zeros(6,433);
-AN = zeros(3,3,433);
-pos_lmks_C = zeros(3,50,433);
-pos_lmks_N = zeros(3,50,433);
-uv = zeros(2,50,433);
+NC = R_CtoN(:,:,1:2:end);
+NA = zeros(3,3,217);
+X_nomObs_A = zeros(6,217);
+AN = zeros(3,3,217);
+pos_lmks_C = zeros(3,50,217);
+pos_lmks_N = zeros(3,50,217);
+uv = zeros(2,50,217);
 
 
 lmks_in_FOV = zeros(num_LMKs,length(t_obs));
@@ -113,7 +113,7 @@ r_A = X_nomObs_A(1:3,:);
 plotOrbit(r_A, "True Trajectory in Asteroid Frame")
 scatter3(pos_lmks_A(1,:), pos_lmks_A(2,:), pos_lmks_A(3,:), '.')
 
-plotMeasurements(t_obs, u_nom, v_nom, nom_lmks_visible, 1:10, "Full Nonlinear Measurement Simulation")
+plotMeasurements(t_obs, u_nom, v_nom, nom_lmks_visible, 1:20, "Full Nonlinear Measurement Simulation")
 
 %% Problem 2 jacobians
 % derive jacobians for the dynamics
@@ -166,7 +166,7 @@ for i = 1:length(t)-1
     bigF(:,:,i) = F;
 end
 
-X_deltaObs_N = X_delta_N(:,1:10:length(t));
+X_deltaObs_N = X_delta_N(:,1:20:length(t));
 
 for i = 1:length(t_obs)
    % cacluate C

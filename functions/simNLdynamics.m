@@ -12,8 +12,8 @@ ode_fun = @(t,X) dynamics(t,X,const,w_tilde);
 X_sim_N = X_sim_N';
 t = t';
 
-X_simObs_N = X_sim_N(:,1:10:length(t));
-t_obs = t(1:10:length(t));
+X_simObs_N = X_sim_N(:,1:20:length(t));
+t_obs = t(1:20:length(t));
 
 
 

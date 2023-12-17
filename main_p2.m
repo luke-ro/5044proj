@@ -104,7 +104,7 @@ calcNEESNIS(Nsimruns,t_obs,P0_LKF,P0,C_w_tilde,Q_LKF,R,OMEGA,0.05,0.05, const)
 calcEKFNEESNIS(Nsimruns,t_obs,P0_EKF,P0,C_w_tilde, Q_EKF, R, 0.05, 0.05, const, gamma)
 
 
-for i = 1:433
+for i = 1:217
     if any(diag([P_k_plus_hist(:,:,i)]) < 0)
         fprintf("Negative diagonal elements at k = %d \n", i)
     end

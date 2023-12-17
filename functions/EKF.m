@@ -38,7 +38,7 @@ P_k_plus_hist(:,:,1) = P_k_plus;
 
 % lmk_idxs = 1:50;
 for i = 2:npts_obs
-    for j = 1:10
+    for j = 1:20
         [xhat_k_plus, P_k_plus] = EKF_dynamicPrediction(xhat_k_plus, P_k_plus, Q, gamma, const, steps);
     end
     xhat_kplus1_minus = xhat_k_plus;
